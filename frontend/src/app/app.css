@@ -84,7 +84,7 @@ h1 {
 
 .stat-item:hover {
   transform: translateY(-2px);
-  border-color: rgba(255,255,255,0.1);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .stat-item .label {
@@ -103,10 +103,13 @@ h1 {
   letter-spacing: -0.02em;
 }
 
-.stat-item .value.profit { color: var(--success); }
-.stat-item .value.loss { color: var(--danger); }
+.stat-item .value.profit {
+  color: var(--success);
+}
+.stat-item .value.loss {
+  color: var(--danger);
+}
 
-/* Config Panel - Minimal */
 .config-panel {
   background: var(--card-bg);
   padding: 24px;
@@ -130,64 +133,65 @@ h1 {
 }
 
 .current-config .value {
-    color: var(--primary);
-    background: rgba(99, 102, 241, 0.1);
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 500;
+  color: var(--primary);
+  background: rgba(99, 102, 241, 0.1);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .config-form {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 16px;
 }
 
 select {
-    appearance: none;
-    background: #ffffff;
-    border: 1px solid var(--border);
-    color: var(--text-main);
-    padding: 12px 16px;
-    border-radius: 12px;
-    font-family: inherit;
-    font-size: 0.9rem;
-    cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    background-size: 16px;
-    transition: all 0.2s;
+  appearance: none;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+  transition: all 0.2s;
 }
 
 select:hover {
-    border-color: #cbd5e1;
+  border-color: #cbd5e1;
 }
 
-select:focus, button:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--accent);
+select:focus,
+button:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--accent);
 }
 
 /* Button Update */
 button {
-    background: var(--primary);
-    color: white;
-    padding: 0 24px;
-    border-radius: 12px;
-    font-weight: 500;
-    font-size: 0.9rem;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
+  background: var(--primary);
+  color: white;
+  padding: 0 24px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
 }
 
 button:hover {
-    background: #4338ca; /* Indigo 700 */
-    transform: none;
-    opacity: 1;
+  background: #4338ca; /* Indigo 700 */
+  transform: none;
+  opacity: 1;
 }
 .trade-feed h3 {
   font-size: 0.9rem;
@@ -216,18 +220,19 @@ button:hover {
 }
 
 .trade-card:hover {
-    border-color: rgba(255,255,255,0.08);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 /* Remove colored borders, use badges instead */
-.trade-card.buy, .trade-card.sell {
-    border-left: 1px solid var(--border);
+.trade-card.buy,
+.trade-card.sell {
+  border-left: 1px solid var(--border);
 }
 
 .card-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .symbol {
@@ -242,9 +247,9 @@ button:hover {
 }
 
 .card-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .quantity {
@@ -254,37 +259,76 @@ button:hover {
 }
 
 .side-badge {
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 6px 12px;
-    border-radius: 8px;
-    min-width: 60px;
-    text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  min-width: 60px;
+  text-align: center;
 }
 
 .trade-card.buy .side-badge {
-    color: var(--success);
-    background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  background: rgba(16, 185, 129, 0.1);
 }
 
 .trade-card.sell .side-badge {
-    color: var(--danger);
-    background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .error-banner {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--danger);
-    border: 1px solid rgba(239, 68, 68, 0.1);
-    border-radius: 16px;
-    padding: 16px;
-    text-align: center;
-    margin-bottom: 32px;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.1);
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 32px;
 }
 
 .empty-state {
-    padding: 60px;
-    color: var(--text-dim);
-    font-weight: 300;
-    opacity: 0.6;
+  padding: 60px;
+  color: var(--text-dim);
+  font-weight: 300;
+  opacity: 0.6;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 32px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.chart-container {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 24px;
+  height: 400px;
+  position: relative;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.stats-grid-mt {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
 }

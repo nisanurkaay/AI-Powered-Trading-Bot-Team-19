@@ -6,72 +6,83 @@
     </span>
   </header>
 
-  <main>
-    <div *ngIf="!connected()" class="error-banner">
-        ⚠️ Cannot connect to Trading Bot Backend. Make sure the Java app is running.
-    </div>
+  <main class="dashboard-grid">
+    <div class="left-column">
+        <div *ngIf="!connected()" class="error-banner">
+             Cannot connect to Trading Bot Backend. 
+        </div>
 
-    <div class="config-panel" *ngIf="connected()">
-        <div class="current-config">
-            <span class="label">Running Strategy</span>
-            <span class="value">{{ currentStrategy() }}</span>
+        <div class="config-panel" *ngIf="connected()">
+            <div class="current-config">
+                <span class="label">Running Strategy</span>
+                <span class="value">{{ currentStrategy() }}</span>
+            </div>
+            
+            <div class="config-form">
+                <div class="form-group">
+                    <select [(ngModel)]="selectedStrategy">
+                        <option *ngFor="let s of strategies" [value]="s">{{ s }}</option>
+                    </select>
+                </div>
+                <!-- Decorator select removed to save space or keep it if needed, let's keep minimal -->
+                 <div class="form-group">
+                    <select [(ngModel)]="selectedDecorator">
+                        <option *ngFor="let d of decorators" [value]="d">{{ d }}</option>
+                    </select>
+                </div>
+                <button (click)="applyConfig()">Update</button>
+            </div>
+        </div>
+
+        <div class="stats-overview">
+            <div class="stat-item">
+                <span class="label">Est. Value (USDT)</span>
+                <span class="value">{{ portfolioValue() | number:'1.2-2' }}</span>
+            </div>
+            <!-- Collapsed stats for space -->
+             <div class="stat-item">
+                <span class="label">PnL %</span>
+                <span class="value" [class.profit]="portfolioValue() >= 1000" [class.loss]="portfolioValue() < 1000">
+                    {{ ((portfolioValue() - 1000) / 1000) | percent:'1.2-2' }}
+                </span>
+            </div>
         </div>
         
-        <div class="config-form">
-            <div class="form-group">
-                <select [(ngModel)]="selectedStrategy">
-                    <option *ngFor="let s of strategies" [value]="s">{{ s }}</option>
-                </select>
+        <div class="trade-feed">
+          <h3>Recent Trades</h3>
+          <div class="trade-list">
+            <div class="trade-card" *ngFor="let trade of trades" [class.buy]="trade.side === 'BUY'" [class.sell]="trade.side === 'SELL'">
+              <div class="card-left">
+                <div class="symbol">{{ trade.symbol }}</div>
+                <div class="timestamp">{{ trade.timestamp | date:'HH:mm:ss' }}</div>
+              </div>
+              <div class="card-right">
+                <div class="side-badge">{{ trade.side }}</div>
+                <div class="quantity">{{ trade.price | number:'1.2-2' }}</div>
+              </div>
             </div>
-            <div class="form-group">
-                <select [(ngModel)]="selectedDecorator">
-                    <option *ngFor="let d of decorators" [value]="d">{{ d }}</option>
-                </select>
-            </div>
-            <button (click)="applyConfig()">Update</button>
+          </div>
+          <div *ngIf="trades.length === 0" class="empty-state">
+            Waiting for market signals...
+          </div>
         </div>
     </div>
 
-    <div class="stats-overview">
-        <div class="stat-item">
-            <span class="label">Est. Value (USDT)</span>
-            <span class="value">{{ portfolioValue() | number:'1.2-2' }}</span>
+    <div class="right-column">
+        <div class="chart-container">
+            <canvas #priceChart></canvas>
         </div>
-        <div class="stat-item">
-            <span class="label">Liquid USDT</span>
-            <span class="value">{{ usdtBalance() | number:'1.2-2' }}</span>
-        </div>
-        <div class="stat-item">
-            <span class="label">BTC Holdings</span>
-            <span class="value">{{ btcBalance() | number:'1.4-4' }}</span>
-        </div>
-        <div class="stat-item">
-            <span class="label">PnL %</span>
-            <span class="value" [class.profit]="portfolioValue() >= 1000" [class.loss]="portfolioValue() < 1000">
-                {{ ((portfolioValue() - 1000) / 1000) | percent:'1.2-2' }}
-            </span>
-        </div>
-    </div>
-
-    <div class="trade-feed">
-      <h3>Recent Activity</h3>
-      
-      <div class="trade-list">
-        <div class="trade-card" *ngFor="let trade of trades" [class.buy]="trade.side === 'BUY'" [class.sell]="trade.side === 'SELL'">
-          <div class="card-left">
-            <div class="symbol">{{ trade.symbol }}</div>
-            <div class="timestamp">{{ trade.timestamp | date:'HH:mm:ss' }}</div>
-          </div>
-          <div class="card-right">
-            <div class="side-badge">{{ trade.side }}</div>
-            <div class="quantity">{{ trade.quantity }} BTC</div>
-          </div>
-        </div>
-      </div>
-      
-      <div *ngIf="trades.length === 0" class="empty-state">
-        Waiting for market signals...
-      </div>
+        <!-- Additional stats can go here -->
+         <div class="stats-grid-mt">
+            <div class="stat-item">
+                <span class="label">Liquid USDT</span>
+                <span class="value">{{ usdtBalance() | number:'1.2-2' }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="label">BTC Holdings</span>
+                <span class="value">{{ btcBalance() | number:'1.4-4' }}</span>
+            </div>
+         </div>
     </div>
   </main>
 </div>

@@ -123,6 +123,10 @@ public class ApiService {
                 // Very basic parsing
                 boolean sma = body.contains("SmaCrossover");
                 boolean trend = body.contains("TrendFollowing");
+                boolean rsi = body.contains("RSI");
+                boolean macd = body.contains("MACD");
+                boolean adx = body.contains("ADX");
+                boolean def = body.contains("Default");
                 
                 boolean crash = body.contains("CrashProtection");
                 boolean high = body.contains("HighRisk");
@@ -131,7 +135,16 @@ public class ApiService {
                 TradingStrategy baseStrategy;
                 if (trend) {
                     baseStrategy = new TrendFollowing();
+                } else if (rsi) {
+                    baseStrategy = new RsiStrategy();
+                } else if (macd) {
+                    baseStrategy = new MacdStrategy();
+                } else if (adx) {
+                    baseStrategy = new AdxStrategy();
+                } else if (def) {
+                    baseStrategy = new DefaultStrategy();
                 } else {
+                    // Default to SMA if nothing else matches (or explictly SMA)
                     baseStrategy = new SmaCrossover(5, 10);
                 }
 
