@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap');
+
+:root {
+  /* Minimalist Modern Light Theme */
+  --bg-color: #f8fafc; /* Slate 50 */
+  --card-bg: #ffffff;  /* White */
+  --text-main: #0f172a; /* Slate 900 */
+  --text-dim: #64748b;  /* Slate 500 */
+  
+  --primary: #4f46e5; /* Indigo 600 */
+  --accent: #e0e7ff;  /* Indigo 100 */
+  
+  --success: #059669; /* Emerald 600 */
+  --danger: #dc2626;  /* Red 600 */
+  
+  --border: #e2e8f0;  /* Slate 200 */
+  --glass: rgba(255, 255, 255, 0.7);
+}
+
+body {
+  margin: 0;
+  font-family: 'Outfit', sans-serif; /* Cleaner, modern geometric sans */
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}

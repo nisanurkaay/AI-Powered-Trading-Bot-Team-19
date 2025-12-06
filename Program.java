@@ -24,6 +24,10 @@ public class Program {
         //register observer to subject
         subject.register(observer);
 
+        // Initialize API Service
+        services.ApiService apiService = new services.ApiService();
+        apiService.start(8081);
+
         // Initialize Binance Service
         services.BinanceService binanceService = new services.BinanceService();
         String symbol = "BTCUSDT";

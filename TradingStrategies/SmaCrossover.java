@@ -46,4 +46,8 @@ public class SmaCrossover implements TradingStrategy {
         }
         return sum / window;
     }
+    @Override
+    public String getName() {
+        return "SmaCrossover (Short: " + shortWindow + ", Long: " + longWindow + ")";
+    }
 }

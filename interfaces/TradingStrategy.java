@@ -6,5 +6,5 @@ import models.*;
 public interface TradingStrategy{
 
     Signal generateSignal(List<Price> prices);
-
+    String getName();
 }

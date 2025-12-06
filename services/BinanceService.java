@@ -120,4 +120,73 @@ public class BinanceService {
         }
         return -1;
     }
+    public models.WalletBalance getWalletBalance() {
+        if (!BinanceConfig.isConfigured()) {
+            return new models.WalletBalance(0, 0);
+        }
+
+        try {
+            String endpoint = "/api/v3/account";
+            long timestamp = System.currentTimeMillis();
+            String queryParams = "timestamp=" + timestamp;
+            String signature = hmacSha256(queryParams, BinanceConfig.SECRET_KEY);
+            String fullQuery = queryParams + "&signature=" + signature;
+
+            URL url = new URL(BinanceConfig.BASE_URL + endpoint + "?" + fullQuery);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("X-MBX-APIKEY", BinanceConfig.API_KEY);
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder content = new StringBuilder();
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+                in.close();
+                String json = content.toString();
+                
+                double usdt = parseAssetBalance(json, "USDT");
+                double btc = parseAssetBalance(json, "BTC");
+                return new models.WalletBalance(usdt, btc);
+            } else {
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                StringBuilder error = new StringBuilder();
+                String line;
+                while((line = in.readLine()) != null) error.append(line);
+                in.close();
+                System.out.println("Failed to fetch balance. Code: " + responseCode + " Msg: " + error.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new models.WalletBalance(0, 0);
+    }
+
+    private double parseAssetBalance(String json, String asset) {
+        try {
+            // Very naive JSON parsing to avoid pulling in external libraries effectively
+            // Looking for "asset":"BTC",..."free":"0.001"
+            String assetSearch = "\"asset\":\"" + asset + "\"";
+            int assetIndex = json.indexOf(assetSearch);
+            if (assetIndex != -1) {
+                // Find "free" after asset
+                String freeSearch = "\"free\":\"";
+                int freeIndex = json.indexOf(freeSearch, assetIndex);
+                if (freeIndex != -1) {
+                    freeIndex += freeSearch.length();
+                    int endIndex = json.indexOf("\"", freeIndex);
+                    if (endIndex != -1) {
+                        return Double.parseDouble(json.substring(freeIndex, endIndex));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error parsing balance for " + asset);
+        }
+        return 0.0;
+    }
 }

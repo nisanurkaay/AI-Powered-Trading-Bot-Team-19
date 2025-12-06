@@ -16,4 +16,8 @@ public abstract class StrategyDecorator implements TradingStrategy {
     public Signal generateSignal(List<Price> prices) {
         return wrappedStrategy.generateSignal(prices);
     }
+    @Override
+    public String getName() {
+        return this.getClass().getSimpleName() + " + " + wrappedStrategy.getName();
+    }
 }

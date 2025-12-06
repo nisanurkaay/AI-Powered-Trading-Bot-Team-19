@@ -33,4 +33,8 @@ public class TrendFollowing implements TradingStrategy{
 
  
     
+    @Override
+    public String getName() {
+        return "TrendFollowing (Last: " + lastXprice + ")";
+    }
 }
