@@ -7,6 +7,7 @@ import interfaces.TradingTemplate;
 import models.Order;
 import models.Price;
 import models.Signal;
+import commands.*;
 
 public class Bot extends TradingTemplate {
 
@@ -46,32 +47,20 @@ public class Bot extends TradingTemplate {
     protected void executeOrder(Order order) {
         if (order.side.equals("HOLD")) return;
 
-        boolean isReal = services.BinanceConfig.isConfigured();
+        OrderReceiver receiver = new OrderReceiver();
+        // Get current price for simulation purposes (logic inside Receiver)
+        double currentPrice = data.isEmpty() ? 0 : data.get(data.size() - 1).value;
 
-        if (isReal) {
-            // Real Execution on Binance (Testnet)
-            services.BinanceService service = new services.BinanceService();
-            service.placeOrder(order.symbol, order.side, order.quantity);
-            // We don't manually update local wallet since we rely on API balance
-        } else {
-            // Simulation
-            models.Wallet wallet = models.Wallet.getInstance();
-            double currentPrice = data.get(data.size() - 1).value;
-            double cost = order.quantity * currentPrice;
+        OrderCommand command = null;
 
-            if (order.side.equals("BUY")) {
-                if (wallet.getUsdtBalance() >= cost) {
-                    wallet.withdrawUsdt(cost);
-                    wallet.depositBtc(order.quantity);
-                    System.out.println("SIMULATION BUY | Cost: " + String.format("%.2f", cost) + " USDT");
-                }
-            } else if (order.side.equals("SELL")) {
-                if (wallet.getBtcBalance() >= order.quantity) {
-                    wallet.withdrawBtc(order.quantity);
-                    wallet.depositUsdt(cost);
-                    System.out.println("SIMULATION SELL | Received: " + String.format("%.2f", cost) + " USDT");
-                }
-            }
+        if (order.side.equals("BUY")) {
+            command = new BuyCommand(receiver, order, currentPrice);
+        } else if (order.side.equals("SELL")) {
+            command = new SellCommand(receiver, order, currentPrice);
+        }
+
+        if (command != null) {
+            command.execute();
         }
     }
 
