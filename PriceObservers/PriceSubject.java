@@ -9,7 +9,7 @@ import models.Price;
 
 public class PriceSubject implements Subject{
     List<Observer> observers = new ArrayList<>();
-    Price price;
+    models.Candle candle;
     
     @Override
     public void register(Observer o) {
@@ -29,12 +29,12 @@ public class PriceSubject implements Subject{
     @Override
     public void notifyObservers() {
         for(int i = 0; i <observers.size(); i++){
-            observers.get(i).priceUpdated(price);
+            observers.get(i).priceUpdated(candle);
         }
         System.out.println("Observers Notified!!");
     }
-    public void setPrice(Price price){
-        this.price = price;
+    public void setPrice(models.Candle candle){
+        this.candle = candle;
     }
     
 }

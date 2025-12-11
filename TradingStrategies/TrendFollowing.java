@@ -1,40 +1,32 @@
 package TradingStrategies;
 
-import java.util.*;
-
+import java.util.List;
 import interfaces.TradingStrategy;
-import models.*;
+import models.Signal;
+import models.Candle;
 
-public class TrendFollowing implements TradingStrategy{
-    int lastXprice = 5;
-    @Override
-    public Signal generateSignal(List<Price> prices) {
-        if(prices.size() < lastXprice){
-            return Signal.HOLD;
-        }else{
-            if(isTrendFollowing(prices)){
-                return Signal.BUY;
-            }else{
-                return Signal.HOLD;
-            }
-        }
-    }
-
-    public boolean isTrendFollowing(List<Price> prices){
-        int last = prices.size() - lastXprice;
-        for(int i = 0; i < lastXprice -1; i++){
-            if(prices.get(last).value > prices.get(last +1).value){
-                return false;
-            }
-
-        }
-        return true;
-    }
-
- 
+public class TrendFollowing implements TradingStrategy {
     
     @Override
+    public Signal generateSignal(List<Candle> candles) {
+        if (candles.size() < 2) {
+            return Signal.HOLD;
+        }
+
+        double currentPrice = candles.get(candles.size() - 1).close;
+        double previousPrice = candles.get(candles.size() - 2).close;
+
+        if (currentPrice > previousPrice) {
+            return Signal.BUY;
+        } else if (currentPrice < previousPrice) {
+            return Signal.SELL;
+        }
+
+        return Signal.HOLD;
+    }
+
+    @Override
     public String getName() {
-        return "TrendFollowing (Last: " + lastXprice + ")";
+        return "Trend Following (Simple)";
     }
 }

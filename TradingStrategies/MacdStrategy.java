@@ -2,95 +2,98 @@ package TradingStrategies;
 
 import java.util.List;
 import interfaces.TradingStrategy;
-import models.Price;
 import models.Signal;
+import models.Candle;
 
 public class MacdStrategy implements TradingStrategy {
-    private int shortPeriod = 12;
-    private int longPeriod = 26;
+    private int fastPeriod = 12;
+    private int slowPeriod = 26;
     private int signalPeriod = 9;
 
     @Override
-    public Signal generateSignal(List<Price> priceData) {
-        if (priceData.size() < longPeriod + signalPeriod) {
+    public Signal generateSignal(List<Candle> candles) {
+        if (candles.size() < slowPeriod + signalPeriod + 5) {
             return Signal.HOLD;
         }
 
-        // We need the two most recent MACD and Signal line values to check for crossover
-        // Current values
-        double[] currentMacd = calculateMacdValues(priceData, priceData.size() - 1);
-        double macdCurrent = currentMacd[0];
-        double signalCurrent = currentMacd[1];
+        MacdResult current = calculateMACD(candles, candles.size() - 1);
+        MacdResult previous = calculateMACD(candles, candles.size() - 2);
 
-        // Previous values (to detect cross)
-        double[] prevMacd = calculateMacdValues(priceData, priceData.size() - 2);
-        double macdPrev = prevMacd[0];
-        double signalPrev = prevMacd[1];
+        // 1. Histogram Reversal: Histogram negative but rising toward zero (Bullish momentum building)
+        boolean histogramReversalUp = current.histogram < 0 && 
+                                      current.histogram > previous.histogram && 
+                                      previous.histogram < previous_prev_histogram(candles); 
 
-        // Crossover logic
-        // Bullish Cross: MACD crosses ABOVE Signal Line
-        if (macdPrev <= signalPrev && macdCurrent > signalCurrent) {
-            return Signal.BUY;
+        if (histogramReversalUp) {
+             return Signal.BUY; 
         }
-        // Bearish Cross: MACD crosses BELOW Signal Line
-        else if (macdPrev >= signalPrev && macdCurrent < signalCurrent) {
+
+        // Standard Crossover
+        if (previous.macdLine < previous.signalLine && current.macdLine > current.signalLine) {
+            return Signal.BUY;
+        } else if (previous.macdLine > previous.signalLine && current.macdLine < current.signalLine) {
             return Signal.SELL;
         }
 
         return Signal.HOLD;
     }
-
-    // Returns [MACD Line, Signal Line]
-    private double[] calculateMacdValues(List<Price> data, int endIndex) {
-        // Calculate EMAs up to endIndex
-        double emaShort = calculateEMA(data, shortPeriod, endIndex);
-        double emaLong = calculateEMA(data, longPeriod, endIndex);
-        
-        double macdLine = emaShort - emaLong;
-        
-        // This is a simplification. Properly, Signal Line is EMA of MACD Line history.
-        // Doing recursion for Signal Line is expensive without a cache. 
-        // For this assignment, we will approximate Signal Line by calculating MACD for the last 'signalPeriod' points and averaging them (SMA) or trying to compute EMA on the fly.
-        // Given the constraints and likely list implementation, let's use SMA of MACD as a proxy or simple EMA if possible.
-        // To do it right: We strictly need a series of MACD values.
-        
-        // Simplified approach for robustness: 
-        // Calculate MACD for the last 9 points and take their average (SMA) as signal line.
-        // It's not strictly 9-EMA but close enough for a basic bot.
-        
-        double signalLine = 0;
-        int distinctPoints = 0;
-        for(int i = 0; i < signalPeriod; i++) {
-            if(endIndex - i < longPeriod) break;
-            double eShort = calculateEMA(data, shortPeriod, endIndex - i);
-            double eLong = calculateEMA(data, longPeriod, endIndex - i);
-            signalLine += (eShort - eLong);
-            distinctPoints++;
-        }
-        if(distinctPoints > 0) signalLine /= distinctPoints;
-
-        return new double[]{macdLine, signalLine};
+    
+    // Helper to get hist 3 steps back
+    private double previous_prev_histogram(List<Candle> candles) {
+         if (candles.size() < 3) return 0;
+         return calculateMACD(candles, candles.size() - 3).histogram;
     }
 
-    private double calculateEMA(List<Price> data, int period, int index) {
-        if (index < 0 || index >= data.size()) return 0;
-        
-        double k = 2.0 / (period + 1);
-        double ema = data.get(0).value; // Start with first value
-        
-        int start = Math.max(0, index - (period * 4));
-        if (start == 0) ema = data.get(0).value;
-        else ema = data.get(start).value; // approximate start
+    private static class MacdResult {
+        double macdLine;
+        double signalLine;
+        double histogram;
+    }
 
-        for (int i = start + 1; i <= index; i++) {
-            double price = data.get(i).value;
-            ema = price * k + ema * (1 - k);
+    private MacdResult calculateMACD(List<Candle> data, int endIndex) {
+        double fastEma = calculateEMA(data, fastPeriod, endIndex);
+        double slowEma = calculateEMA(data, slowPeriod, endIndex);
+        
+        double macdLine = fastEma - slowEma;
+        
+        // Simplified Signal Line calculation: Average of last 'signalPeriod' MACD values
+        double signalLine = calculateSimpleSignalLine(data, signalPeriod, endIndex);
+
+        MacdResult res = new MacdResult();
+        res.macdLine = macdLine;
+        res.signalLine = signalLine;
+        res.histogram = macdLine - signalLine;
+        return res;
+    }
+
+    private double calculateEMA(List<Candle> data, int period, int endIndex) {
+        double k = 2.0 / (period + 1);
+        double ema = data.get(endIndex - period + 1).close; // Start with SMA approximation
+        
+        // Simple scan to catch up EMA
+        int start = Math.max(0, endIndex - (period * 3)); 
+        ema = data.get(start).close;
+        
+        for (int i = start + 1; i <= endIndex; i++) {
+            ema = data.get(i).close * k + ema * (1 - k);
         }
         return ema;
+    }
+    
+    private double calculateSimpleSignalLine(List<Candle> data, int period, int endIndex) {
+         double sum = 0;
+         int count = 0;
+         for(int i = 0; i < period; i++) {
+             count++;
+             double fast = calculateEMA(data, fastPeriod, endIndex - i);
+             double slow = calculateEMA(data, slowPeriod, endIndex - i);
+             sum += (fast - slow);
+         }
+         return (count > 0) ? sum / count : 0;
     }
 
     @Override
     public String getName() {
-        return "MACD (12, 26, 9)";
+        return "MACD Strategy";
     }
 }

@@ -11,9 +11,9 @@ import java.nio.charset.StandardCharsets;
 
 public class BinanceService {
 
-    public double getPrice(String symbol) {
+    public models.Candle getCandle(String symbol, String interval) {
         try {
-            String endpoint = BinanceConfig.BASE_URL + "/api/v3/ticker/price?symbol=" + symbol;
+            String endpoint = BinanceConfig.BASE_URL + "/api/v3/klines?symbol=" + symbol + "&interval=" + interval + "&limit=1";
             URL url = new URL(endpoint);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -32,14 +32,14 @@ public class BinanceService {
                 in.close();
                 conn.disconnect();
 
-                return parsePriceFromJson(content.toString());
+                return parseCandleFromJson(content.toString());
             } else {
                 System.out.println("GET request failed. Response Code: " + responseCode);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return -1;
+        return null;
     }
 
     public void placeOrder(String symbol, String side, double quantity) {
@@ -103,22 +103,32 @@ public class BinanceService {
         }
     }
 
-    private double parsePriceFromJson(String json) {
+    private models.Candle parseCandleFromJson(String json) {
         try {
-            String searchKey = "\"price\":\"";
-            int startIndex = json.indexOf(searchKey);
-            if (startIndex != -1) {
-                startIndex += searchKey.length();
-                int endIndex = json.indexOf("\"", startIndex);
-                if (endIndex != -1) {
-                    String priceStr = json.substring(startIndex, endIndex);
-                    return Double.parseDouble(priceStr);
-                }
+            json = json.trim();
+            if (json.startsWith("[[") && json.endsWith("]]")) {
+                json = json.substring(2, json.length() - 2);
             }
+            
+            String[] parts = json.split("\",\"");
+            
+              
+            String[] rawValues = json.split(",");
+            if (rawValues.length < 6) return null;
+
+            long openTime = Long.parseLong(rawValues[0].replaceAll("\"", ""));
+            double open = Double.parseDouble(rawValues[1].replaceAll("\"", ""));
+            double high = Double.parseDouble(rawValues[2].replaceAll("\"", ""));
+            double low = Double.parseDouble(rawValues[3].replaceAll("\"", ""));
+            double close = Double.parseDouble(rawValues[4].replaceAll("\"", ""));
+            double volume = Double.parseDouble(rawValues[5].replaceAll("\"", ""));
+            long closeTime = Long.parseLong(rawValues[6].replaceAll("\"", ""));
+
+            return new models.Candle(openTime, open, high, low, close, volume, closeTime);
         } catch (Exception e) {
-            System.out.println("Error parsing JSON: " + e.getMessage());
+            System.out.println("Error parsing Candle JSON: " + e.getMessage());
         }
-        return -1;
+        return null;
     }
     public models.WalletBalance getWalletBalance() {
         if (!BinanceConfig.isConfigured()) {

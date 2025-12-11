@@ -2,7 +2,7 @@ package StrategyDecorator;
 
 import java.util.List;
 import interfaces.TradingStrategy;
-import models.Price;
+import models.Candle;
 import models.Signal;
 
 public class CrashProtection extends StrategyDecorator {
@@ -14,23 +14,24 @@ public class CrashProtection extends StrategyDecorator {
     }
 
     @Override
-    public Signal generateSignal(List<Price> prices) {
-        if (prices.size() < 2) {
-            return wrappedStrategy.generateSignal(prices);
+    public Signal generateSignal(List<Candle> candles) {
+        if (candles.size() < 2) {
+            return wrappedStrategy.generateSignal(candles);
         }
 
-        Price current_price = prices.get(prices.size() - 1);
+        Candle current = candles.get(candles.size() - 1);
         // Look back 5 ticks or less
-        int lookback = Math.min(prices.size(), 5);
-        Price old_price = prices.get(prices.size() - lookback);
+        int lookback = Math.min(candles.size(), 5);
+        Candle old = candles.get(candles.size() - lookback);
 
-        double change = (current_price.value - old_price.value) / old_price.value;
+        double change = (current.close - old.close) / old.close;
 
+        // Check for sudden drop
         if (change < -dropThreshold) {
             System.out.println("CRASH PROTECTION ENABLED: Price dropped " + String.format("%.2f%%", change * 100));
             return Signal.SELL;
         }
 
-        return wrappedStrategy.generateSignal(prices);
+        return wrappedStrategy.generateSignal(candles);
     }
 }

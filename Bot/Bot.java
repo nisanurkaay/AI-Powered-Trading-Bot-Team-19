@@ -4,23 +4,38 @@ import java.util.List;
 
 import interfaces.TradingStrategy;
 import interfaces.TradingTemplate;
+import models.Candle;
 import models.Order;
-import models.Price;
 import models.Signal;
 import commands.*;
 
 public class Bot extends TradingTemplate {
+    private BotConfig config = BotConfig.getInstance();
+    private StrategySelector selector = new StrategySelector();
 
     @Override
-    protected List<Price> fetchData(Price price) {
-        data.add(price);
-        return data;
+    protected List<Candle> fetchData(Candle candle) {
+        data.add(candle);
+        // Keep memory usage in check (keep last 500 candles roughly)
+        if (data.size() > 500) {
+            data.remove(0);
+        }
+        return data; // Return full history for analysis
     }
+
     @Override
-    protected Signal evaluateData(List<Price> prices) {
-        BotConfig config = BotConfig.getInstance();
-        TradingStrategy strategy = config.strategy;
-        return strategy.generateSignal(data);
+    protected Signal evaluateData(List<Candle> candles) {
+         if (candles.isEmpty()) return Signal.HOLD;
+         
+         // Dynamic Strategy Selection
+         TradingStrategy bestStrategy = selector.determineStrategy(candles);
+         
+         // Update Config (or just use local variable)
+         if (config.strategy != bestStrategy) {
+              config.strategy = bestStrategy;
+         }
+         
+         return config.strategy.generateSignal(candles);
     }
 
     @Override
@@ -49,7 +64,7 @@ public class Bot extends TradingTemplate {
 
         OrderReceiver receiver = new OrderReceiver();
         // Get current price for simulation purposes (logic inside Receiver)
-        double currentPrice = data.isEmpty() ? 0 : data.get(data.size() - 1).value;
+        double currentPrice = data.isEmpty() ? 0 : data.get(data.size() - 1).close;
 
         OrderCommand command = null;
 
@@ -68,7 +83,7 @@ public class Bot extends TradingTemplate {
     protected void logResult(Order order) {
         System.out.println(order.toString());
         
-        double currentPrice = data.isEmpty() ? 0 : data.get(data.size() - 1).value;
+        double currentPrice = data.isEmpty() ? 0 : data.get(data.size() - 1).close;
         double usdtBalance = 0;
         double btcBalance = 0;
 
@@ -83,7 +98,7 @@ public class Bot extends TradingTemplate {
             btcBalance = wallet.getBtcBalance();
         }
 
-                System.out.println(String.format(java.util.Locale.US, "Balance: %.2f USDT | %.5f BTC", usdtBalance, btcBalance));
+        System.out.println(String.format(java.util.Locale.US, "Balance: %.2f USDT | %.5f BTC", usdtBalance, btcBalance));
 
         // CSV Logging
         synchronized (services.LockService.fileLock) {

@@ -6,21 +6,21 @@ import models.*;
 public abstract class TradingTemplate {
 
     protected TradingStrategy strategy;
-    protected ArrayList<Price> data = new ArrayList<>();
+    protected ArrayList<Candle> data = new ArrayList<>();
 
     // Template Method (sabit akış)
-    public final void trade(Price price) {
-        List<Price> prices = fetchData(price);
-        Signal signal = evaluateData(prices);
+    public final void trade(Candle candle) {
+        List<Candle> candles = fetchData(candle);
+        Signal signal = evaluateData(candles);
         Order order = createOrder(signal);
         executeOrder(order);
         logResult(order);
     }
 
     // Abstract method → gövde YOK
-    protected abstract List<Price> fetchData(Price price);
+    protected abstract List<Candle> fetchData(Candle candle);
 
-    protected abstract Signal evaluateData(List<Price> prices);
+    protected abstract Signal evaluateData(List<Candle> candles);
 
     // Abstract method → gövde YOK
     protected abstract Order createOrder(Signal signal);

@@ -1,7 +1,7 @@
 import Bot.BotConfig;
 import PriceObservers.PriceListener;
 import PriceObservers.PriceSubject;
-import models.Price;
+
 import TradingStrategies.TrendFollowing;
 
 public class Program {
@@ -36,17 +36,17 @@ public class Program {
 
         // Real-time data loop
         while(true){
-            // Fetch new price from Binance
-            double currentPrice = binanceService.getPrice(symbol);
+            // Fetch new candle from Binance
+            models.Candle currentCandle = binanceService.getCandle(symbol, "1m");
 
-            if (currentPrice != -1) {
-                System.out.println("Updated price (" + symbol + "): " + currentPrice);
-                subject.setPrice(new Price(currentPrice));
+            if (currentCandle != null) {
+                System.out.println("Updated candle (" + symbol + "): " + currentCandle);
+                subject.setPrice(currentCandle);
 
                 // subject notify the observers 
                 subject.notifyObservers();
             } else {
-                System.out.println("Failed to fetch price.");
+                System.out.println("Failed to fetch candle.");
             }
 
             // one second wait API limit safe

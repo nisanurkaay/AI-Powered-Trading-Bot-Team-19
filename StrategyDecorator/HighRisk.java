@@ -1,9 +1,9 @@
 package StrategyDecorator;
 
 import java.util.List;
-
 import interfaces.TradingStrategy;
-import models.*;
+import models.Candle;
+import models.Signal;
 
 public class HighRisk extends StrategyDecorator {
 
@@ -12,12 +12,8 @@ public class HighRisk extends StrategyDecorator {
     }
 
     @Override
-    public Signal generateSignal(List<Price> prices) {
-
-        // Risk yönetimi burada yapılır:
-        // Örnek: High risk → hiçbir filtre uygulama
-        // ya da aggressive sinyal davranışı 
-
-        return super.generateSignal(prices);
+    public Signal generateSignal(List<Candle> candles) {
+        // High risk logic could go here
+        return super.generateSignal(candles);
     }
 }

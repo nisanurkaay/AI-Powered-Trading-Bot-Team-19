@@ -5,6 +5,6 @@ import models.*;
 
 public interface TradingStrategy{
 
-    Signal generateSignal(List<Price> prices);
+    Signal generateSignal(List<Candle> candles);
     String getName();
 }

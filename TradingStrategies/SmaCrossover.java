@@ -2,52 +2,55 @@ package TradingStrategies;
 
 import java.util.List;
 import interfaces.TradingStrategy;
-import models.Price;
 import models.Signal;
+import models.Candle;
 
 public class SmaCrossover implements TradingStrategy {
-    private final int shortWindow;
-    private final int longWindow;
+    private int shortPeriod;
+    private int longPeriod;
 
-    public SmaCrossover(int shortWindow, int longWindow) {
-        this.shortWindow = shortWindow;
-        this.longWindow = longWindow;
+    public SmaCrossover(int shortPeriod, int longPeriod) {
+        this.shortPeriod = shortPeriod;
+        this.longPeriod = longPeriod;
     }
 
     @Override
-    public Signal generateSignal(List<Price> prices) {
-        if (prices.size() < longWindow) {
+    public Signal generateSignal(List<Candle> candles) {
+        if (candles.size() < longPeriod) {
             return Signal.HOLD;
         }
 
-        double shortSma = calculateSma(prices, shortWindow);
-        double longSma = calculateSma(prices, longWindow);
-        double prevShortSma = calculateSma(prices.subList(0, prices.size() - 1), shortWindow);
-        double prevLongSma = calculateSma(prices.subList(0, prices.size() - 1), longWindow);
-
-        System.out.println(String.format("SMA(%d): %.2f | SMA(%d): %.2f", shortWindow, shortSma, longWindow, longSma));
-
-        // Crossover logic
-        if (prevShortSma <= prevLongSma && shortSma > longSma) {
+         
+        double shortSmaCurrent = calculateSma(candles, shortPeriod, candles.size() - 1);
+        double longSmaCurrent = calculateSma(candles, longPeriod, candles.size() - 1);
+        
+        double shortSmaPrev = calculateSma(candles, shortPeriod, candles.size() - 2);
+        double longSmaPrev = calculateSma(candles, longPeriod, candles.size() - 2);
+        
+        if (shortSmaPrev <= longSmaPrev && shortSmaCurrent > longSmaCurrent) {
             return Signal.BUY;
-        } else if (prevShortSma >= prevLongSma && shortSma < longSma) {
+        }
+        
+      
+        if (shortSmaPrev >= longSmaPrev && shortSmaCurrent < longSmaCurrent) {
             return Signal.SELL;
         }
 
         return Signal.HOLD;
     }
 
-    private double calculateSma(List<Price> prices, int window) {
-        if (prices.size() < window) return 0;
+    private double calculateSma(List<Candle> candles, int window, int endIndex) {
+        if (endIndex < window - 1) return 0;
         
         double sum = 0;
         for (int i = 0; i < window; i++) {
-            sum += prices.get(prices.size() - 1 - i).value;
+            sum += candles.get(endIndex - i).close;
         }
         return sum / window;
     }
+
     @Override
     public String getName() {
-        return "SmaCrossover (Short: " + shortWindow + ", Long: " + longWindow + ")";
+        return "SMA Crossover (" + shortPeriod + "/" + longPeriod + ")";
     }
 }

@@ -2,7 +2,8 @@ package StrategyDecorator;
 
 import java.util.List;
 import interfaces.TradingStrategy;
-import models.*;
+import models.Candle;
+import models.Signal;
 
 public abstract class StrategyDecorator implements TradingStrategy {
 
@@ -13,8 +14,8 @@ public abstract class StrategyDecorator implements TradingStrategy {
     }
 
     @Override
-    public Signal generateSignal(List<Price> prices) {
-        return wrappedStrategy.generateSignal(prices);
+    public Signal generateSignal(List<Candle> candles) {
+        return wrappedStrategy.generateSignal(candles);
     }
     @Override
     public String getName() {
