@@ -28,12 +28,13 @@ public class CrashProtection extends StrategyDecorator {
 
         if (change < -dropThreshold) {
             if (rsi < 25) {
-                System.out.println("CRASH PROTECTION: Drop detected (" + String.format("%.2f%%", change * 100) + ") BUT RSI is Oversold (" + String.format("%.2f", rsi) + "). HOLDING (Avoiding Panic Sell).");
+                System.out.println("CRASH PROTECTION: Drop but RSI Oversold. HOLDING.");
                 return Signal.HOLD; 
             }
             
-            System.out.println("CRASH PROTECTION ENABLED: Price dropped " + String.format("%.2f%%", change * 100) + " (RSI: " + String.format("%.2f", rsi) + ")");
-            return Signal.SELL;
+            // Düşüş varsa ve RSI da düşük değilse ACİL SATIŞ!
+            System.out.println("CRASH PROTECTION ENABLED: Panic Sell! (Drop: " + String.format("%.2f%%", change * 100) + ")");
+            return Signal.STRONG_SELL;
         }
 
         return wrappedStrategy.generateSignal(candles);
