@@ -1,93 +1,21 @@
+# AI-Powered Trading Bot: Enterprise Architecture Documentation
 
-# AI-Powered Trading Bot: Technical Documentation
-
-**Team 19**  
-December 10, 2025
-
-#### Abstract
-
-This document provides comprehensive technical documentation for the **AI-Powered Trading Bot**, a Java-based algorithmic trading system that demonstrates proper implementation of six fundamental design patterns: **Strategy, Observer, Decorator, Command, Template Method, and Singleton**. The system performs real-time market analysis using Binance API, executes trades based on configurable strategies, and provides a modern Angular-based dashboard for monitoring. This documentation serves as both a technical reference and an educational resource for understanding enterprise-level design pattern implementations.
+**Team 19** | December 2025
+**Project Team:** Muhammed İkbal Ceyhan, Yunus Emre Balcı, Nisa Nur Kaya
 
 ---
 
-## Contents
-
-1. [**Introduction**](#1-introduction)
-    *   [1.1 Project Overview](#11-project-overview)
-    *   [1.2 System Requirements](#12-system-requirements)
-        *   [1.2.1 Functional Requirements](#121-functional-requirements)
-        *   [1.2.2 Non-Functional Requirements](#122-non-functional-requirements)
-    *   [1.3 Technology Stack](#13-technology-stack)
-2. [**System Architecture**](#2-system-architecture)
-    *   [2.1 High-Level Architecture](#21-high-level-architecture)
-    *   [2.2 Layer Descriptions](#22-layer-descriptions)
-        *   [2.2.1 Service Layer](#221-service-layer)
-        *   [2.2.2 Core Layer](#222-core-layer)
-        *   [2.2.3 Logic Layer](#223-logic-layer)
-        *   [2.2.4 Execution Layer](#224-execution-layer)
-        *   [2.2.5 Presentation Layer](#225-presentation-layer)
-3. [**Design Patterns Implementation**](#3-design-patterns-implementation)
-    *   [3.1 Strategy Pattern](#31-strategy-pattern)
-        *   [3.1.1 Pattern Overview](#311-pattern-overview)
-        *   [3.1.2 Implementation in Trading Bot](#312-implementation-in-trading-bot)
-        *   [3.1.3 Concrete Strategies](#313-concrete-strategies)
-    *   [3.2 Observer Pattern](#32-observer-pattern)
-        *   [3.2.1 Pattern Overview](#321-pattern-overview)
-        *   [3.2.2 Implementation in Trading Bot](#322-implementation-in-trading-bot)
-    *   [3.3 Decorator Pattern](#33-decorator-pattern)
-        *   [3.3.1 Pattern Overview](#331-pattern-overview)
-        *   [3.3.2 Implementation in Trading Bot](#332-implementation-in-trading-bot)
-    *   [3.4 Command Pattern](#34-command-pattern)
-        *   [3.4.1 Pattern Overview](#341-pattern-overview)
-        *   [3.4.2 Implementation in Trading Bot](#342-implementation-in-trading-bot)
-    *   [3.5 Template Method Pattern](#35-template-method-pattern)
-        *   [3.5.1 Pattern Overview](#351-pattern-overview)
-        *   [3.5.2 Implementation in Trading Bot](#352-implementation-in-trading-bot)
-    *   [3.6 Singleton Pattern](#36-singleton-pattern)
-        *   [3.6.1 Pattern Overview](#361-pattern-overview)
-        *   [3.6.2 Implementation in Trading Bot](#362-implementation-in-trading-bot)
-4. [**Backend Implementation Details**](#4-backend-implementation-details)
-    *   [4.1 Binance Service & Security](#41-binance-service--security)
-        *   [4.1.1 HMAC Signature Generation](#411-hmac-signature-generation)
-    *   [4.2 API Service](#42-api-service)
-        *   [4.2.1 Request Handling](#421-request-handling)
-    *   [4.3 Concurrency & Thread Safety](#43-concurrency--thread-safety)
-5. [**Frontend Implementation**](#5-frontend-implementation)
-    *   [5.1 Angular Architecture](#51-angular-architecture)
-    *   [5.2 Real-time Dashboard](#52-real-time-dashboard)
-6. [**API Documentation**](#6-api-documentation)
-    *   [6.1 REST Endpoints](#61-rest-endpoints)
-        *   [6.1.1 Trade History API](#611-trade-history-api)
-        *   [6.1.2 Strategy Management API](#612-strategy-management-api)
-    *   [6.2 Request/Response Examples](#62-requestresponse-examples)
-7. [**Testing**](#7-testing)
-    *   [7.1 Unit Tests](#71-unit-tests)
-    *   [7.2 Integration Tests](#72-integration-tests)
-8. [**Deployment**](#8-deployment)
-    *   [8.1 Docker Deployment](#81-docker-deployment)
-    *   [8.2 Systemd Service](#82-systemd-service)
-9. [**Conclusion**](#9-conclusion)
-    *   [9.1 Achievements](#91-achievements)
-    *   [9.2 Future Enhancements](#92-future-enhancements)
-
----
-
-# 1 Introduction
+## 1. Introduction
 
 ## 1.1 Project Overview
 
-The AI-Powered Trading Bot is a high-frequency trading simulation and execution platform. Unlike traditional monolithic bots, this system is built on a loosely coupled architecture that allows for runtime strategy switching, dynamic risk management, and real-time data processing without system restart.
+The **AI-Powered Trading Bot** is a sophisticated, modular algorithmic trading system designed to demonstrate the practical application of enterprise-grade **Design Patterns** in a high-concurrency financial environment.
 
-The primary educational objective is to showcase the correct implementation of Gang of Four (GoF) patterns in a financial domain context.
-
-<br><br>
-<br>
-
-
-
-
-
-<br>
+Unlike simple script-based bots, this application uses a loosely coupled architecture that allows for:
+- **Hot-swapping trading strategies** without restarting the application.
+- **Dynamic risk management** layers that can be wrapped around any strategy.
+- **Real-time event-driven processing** of market data.
+- **Simulation and Live modes** for safe testing and execution.
 
 ## 1.2 System Requirements
 
@@ -102,10 +30,6 @@ The primary educational objective is to showcase the correct implementation of G
 - **Reliability:** The system must handle API failures gracefully.
 - **Extensibility:** New strategies must be addable without modifying the Bot class.
 
-<br><br>
-
-
-
 ## 1.3 Technology Stack
 
 | Component | Technology | Version | Description |
@@ -118,58 +42,9 @@ The primary educational objective is to showcase the correct implementation of G
 
 ---
 
+## 2. System Architecture
 
-
-
-<br><br>
-<br>
-
-
-
-
-
-<br>
-
-<br><br>
-
-<br><br>
-<br>
-
-
-
-
-
-<br>
-
-<br><br>
-
-# 2 System Architecture
-
-## 2.1 High-Level Architecture
-
-The system follows a **Event-Driven Layered Architecture**. It acts as an autonomous agent that reacts to external events rather than just user requests.
-
-```mermaid
-graph TD
-    External[Binance Cloud] -->|HTTP GET /ticker| ServiceLayer
-    
-    subgraph "Backend Core"
-        ServiceLayer[BinanceService] -->|Notify| EventBus[PriceSubject]
-        EventBus -->|Update| BotCore[Bot Agent]
-        BotCore -->|Analyze| StrategyLayer[TradingStrategy]
-        BotCore -->|Execute| CommandLayer[OrderCommand]
-    end
-    
-    subgraph "Persistence"
-        CommandLayer -->|Append| CSV[trades.csv]
-        CommandLayer -->|Update| Memory[Wallet Singleton]
-    end
-    
-    subgraph "Presentation"
-        Browser[Angular Dashboard] <-->|REST API| APIServer[ApiService]
-        APIServer <-->|Read| CSV
-    end
-```
+The system operates on an **Event-Driven Layered Architecture**. The core logic is decoupled from data sources and execution mechanisms, ensuring high testability and flexibility.
 
 ## 2.2 Layer Descriptions
 
@@ -180,7 +55,7 @@ Responsible for raw I/O operations. `BinanceService` communicates with the excha
 Contains the central coordination logic. The `Bot` class acts as the orchestrator, receiving data from `PriceSubject`.
 
 ### 2.2.3 Logic Layer
-Pure functional logic that transforms `Price` data into `Signal` (BUY/SELL). Contains `TradingStrategies` and `StrategyDecorator`.
+Pure functional logic that transforms `Candle` data into `Signal` (BUY/SELL). Contains `TradingStrategies` and `StrategyDecorator`.
 
 ### 2.2.4 Execution Layer
 Encapsulates side-effects such as placing orders, updating the wallet, and logging to CSV via `OrderCommand`.
@@ -188,424 +63,334 @@ Encapsulates side-effects such as placing orders, updating the wallet, and loggi
 ### 2.2.5 Presentation Layer
 The Angular frontend that visualizes the internal state for the human operator.
 
+### 2.2.6 Data Models
+Key data structures used across layers:
+*   **Candle:** `open`, `high`, `low`, `close`, `volume`, `timestamp`.
+*   **Order:** `symbol`, `side` (BUY/SELL), `quantity`.
+*   **Signal:** Enum used for trading decisions.
+    *   `STRONG_BUY`: 98% Balance "All In"
+    *   `BUY`: 40% Balance standard entry
+    *   `HOLD`: No action
+    *   `SELL`: 50% Position exit
+    *   `STRONG_SELL`: 100% Position exit (Panic Sell)
+*   **WalletBalance:** Holds USDT and BTC amounts from Binance.
+
 ---
 
+## 3. Design Patterns Implementation
 
-<br><br>
-<br>
+This project implements six fundamental GoF (Gang of Four) design patterns. Below is a detailed breakdown of why each pattern was chosen (Challenge), how it solves the problem (Solution), and the specific implementation in this project.
 
+### 3.1 Strategy Pattern
 
+**Challenge:** 
+Hardcoding trading logic (e.g., "if RSI > 70 then sell") directly into the Bot class makes the system rigid. We need to support multiple trading algorithms (RSI, MACD, SMA) and be able to switch between them at runtime without stopping the bot or modifying the core code.
 
+**Solution:** 
+The **Strategy Pattern** defines a family of algorithms, encapsulates each one, and makes them interchangeable. This allows the trading logic to vary independently from the Bot that uses it.
 
+**Implementation in Project:**
+*   **Interface:** `interfaces.TradingStrategy` - Defines the common contract (`generateSignal`).
+*   **Context:** `Bot.StrategySelector` & `Bot.BotConfig` - The selector dynamically chooses the best strategy based on market conditions (ADX).
+    *   **Cooldown:** Prevents rapid strategy switching (5 candles).
+    *   **Hysteresis:** ADX < 20 (Reversion), ADX > 25 (Trend), else Risk Management.
+*   **Concrete Strategy:**
+    *   `TradingStrategies.SmaCrossover`: Simple Moving Average Crossover (Golden/Death Cross).
+    *   `TradingStrategies.RsiStrategy`: Dynamic thresholds based on trend (Uptrend: Buy < 45, Sell > 80).
+    *   `TradingStrategies.MacdStrategy`: Histogram reversal and signal line crossovers.
+    *   `TradingStrategies.AdxStrategy`: Trend strength analysis.
+    *   `TradingStrategies.TrendFollowing`: Simple price action comparison.
+    *   `TradingStrategies.DefaultStrategy`: ATR-based risk management (%8 drop protection).
 
-<br>
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-<br>
-
-
-
-
-
-<br>
-
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-
-
-# 3 Design Patterns Implementation
-
-## 3.1 Strategy Pattern
-
-### 3.1.1 Pattern Overview
-The Strategy pattern defines a family of algorithms, encapsulates each one, and makes them interchangeable. Strategy lets the algorithm vary independently from clients that use it.
-
-### 3.1.2 Implementation in Trading Bot
-We use this pattern to switch between trading algorithms (e.g., RSI vs. SMA) at runtime. The `Bot` class delegates the analysis to the `TradingStrategy` interface.
+**Code Showcase:**
 
 ```java
-package interfaces;
-import java.util.List;
-import models.*;
-
+// 1. The Strategy Interface
 public interface TradingStrategy {
-    Signal generateSignal(List<Price> prices);
+    Signal generateSignal(List<Candle> candles); // Uses Candle history
     String getName();
 }
-```
-*Listing 1: TradingStrategy Interface*
 
-### 3.1.3 Concrete Strategies
-
-```java
-package TradingStrategies;
+// 2. A Concrete Strategy (SMA Crossover)
 public class SmaCrossover implements TradingStrategy {
-    private final int shortWindow;
-    private final int longWindow;
-
+    // ... fields for periods (e.g. 50, 200) ...
     @Override
-    public Signal generateSignal(List<Price> prices) {
-        if (prices.size() < longWindow) return Signal.HOLD;
-        // ... SMA Logic ...
-        if (shortSma > longSma) return Signal.BUY;
+    public Signal generateSignal(List<Candle> candles) {
+        if (candles.size() < longPeriod) return Signal.HOLD;
+        
+        // Calculate SMA for current and previous candles
+        double shortSmaCurrent = calculateSma(candles, shortPeriod, candles.size() - 1);
+        double longSmaCurrent = calculateSma(candles, longPeriod, candles.size() - 1);
+        double shortSmaPrev = calculateSma(candles, shortPeriod, candles.size() - 2);
+        double longSmaPrev = calculateSma(candles, longPeriod, candles.size() - 2);
+        
+        // Golden Cross (Short crosses above Long)
+        if (shortSmaPrev <= longSmaPrev && shortSmaCurrent > longSmaCurrent) {
+            return Signal.BUY;
+        }
+        
+        // Death Cross (Short crosses below Long)
+        if (shortSmaPrev >= longSmaPrev && shortSmaCurrent < longSmaCurrent) {
+            return Signal.SELL;
+        }
+
         return Signal.HOLD;
     }
 }
 ```
-*Listing 2: SmaCrossover Implementation*
 
+### 3.2 Observer Pattern
 
-<br><br>
-<br><br>
+**Challenge:** 
+The bot operates in a real-time market. Polling the API (constantly asking "Is there a new price?") is inefficient and introduces unnecessary latency. The Bot needs to be notified immediately when a new price candle closes.
 
-## 3.2 Observer Pattern
+**Solution:** 
+The **Observer Pattern** creates a subscription mechanism. The Data Source (Subject) automatically notifies all registered Listeners (Observers) whenever its state changes.
 
-### 3.2.1 Pattern Overview
-Defines a one-to-many dependency so that when one object changes state, all its dependents are notified automatically.
+**Implementation in Project:**
+*   **Subject Interface:** `interfaces.Subject` - Defines `register(Observer)`, `remove(Observer)`, `notifyObservers()`.
+*   **Observer Interface:** `interfaces.Observer` - Defines `priceUpdated(Candle)`.
+*   **Subject Implementation:** `PriceObservers.PriceSubject` - Manages the list of observers and notifies them with the new `Candle`.
+*   **Observer Implementation:** `PriceObservers.PriceListener` - Waits for updates and triggers the bot.
 
-### 3.2.2 Implementation in Trading Bot
-Used to create a "Push" based system for price updates. The `Bot` waits to be notified by the `PriceSubject` instead of polling.
+**Code Showcase:**
 
 ```java
-package PriceObservers;
+// 1. The Subject (Broadcaster)
 public class PriceSubject implements Subject {
     List<Observer> observers = new ArrayList<>();
+    models.Candle candle; // State
 
     @Override
     public void notifyObservers() {
-        for(Observer o : observers){
-            o.priceUpdated(price);
+        // Pushes the update to all subscribers
+        for(int i = 0; i < observers.size(); i++){
+            observers.get(i).priceUpdated(candle);
         }
+    }
+    
+    public void setPrice(models.Candle candle){
+        this.candle = candle;
+    }
+}
+
+// 2. The Observer (Listener)
+public class PriceListener implements Observer {
+    Bot bot = new Bot();
+    @Override
+    public void priceUpdated(Candle candle) {
+        // Reacts immediately to the new data
+        bot.trade(candle);
     }
 }
 ```
-*Listing 3: PriceSubject Implementation*
+
+### 3.3 Decorator Pattern
+
+**Challenge:** 
+We need to apply global risk management rules, such as "Crash Protection" (panic sell if price drops significantly), to *any* active strategy. We don't want to rewrite the logic inside every single strategy class (RSI, SMA, MACD, etc.).
+
+**Solution:** 
+The **Decorator Pattern** allows behavior to be added to an individual object, dynamically, without affecting the behavior of other objects from the same class. We "wrap" the strategy in a protective layer that intercepts the signal.
+
+**Implementation in Project:**
+*   **Abstract Decorator:** `StrategyDecorator.StrategyDecorator` - Implements `TradingStrategy`.
+*   **Concrete Decorator:**
+    *   `StrategyDecorator.CrashProtection`: Panic sell if price drops > X% (default 2%) in 5 candles. Includes RSI check (don't sell if already oversold < 25).
+    *   `StrategyDecorator.HighRisk`: Aggressive logic. Buys on Bullish Divergence or Breakout with Volume. Sells on Pump (>1.5% vs EMA20).
+    *   `StrategyDecorator.LowRisk`: Conservative logic. Buys only if Trend is UP + Volume + MACD positive. Sells on support break.
 
 
-<br><br>
-<br>
-<br>
-
-
-<br><br>
-
-<br><br>
-<br><br>
-
-<br><br>
-<br><br>
-<br><br>
-<br>
-
-
-<br>
-
-
-
-## 3.3 Decorator Pattern
-
-### 3.3.1 Pattern Overview
-Attaches additional responsibilities to an object dynamically. Decorators provide a flexible alternative to subclassing for extending functionality.
-
-### 3.3.2 Implementation in Trading Bot
-Used to add "Crash Protection" to any existing strategy. If the market crashes, the decorator overrides the strategy's decision.
+**Code Showcase:**
 
 ```java
+// 1. The Concrete Decorator
 public class CrashProtection extends StrategyDecorator {
     public CrashProtection(TradingStrategy strategy, double dropThreshold) {
-        super(strategy);
-        this.dropThreshold = dropThreshold;
+        super(strategy); // Wraps the original strategy
     }
 
     @Override
-    public Signal generateSignal(List<Price> prices) {
-        if (isCrashing(prices)) {
-            return Signal.SELL; // Override inner strategy
+    public Signal generateSignal(List<Candle> candles) {
+        // 1. Check for crash condition (Price Drop)
+        Candle current = candles.get(candles.size() - 1);
+        Candle old = candles.get(candles.size() - lookback);
+        double change = (current.close - old.close) / old.close;
+
+        if (change < -dropThreshold) {
+            // Smart Filter: Don't sell if already Oversold (RSI < 25)
+            double rsi = calculateRSI(candles, 14);
+            if (rsi < 25) {
+                return Signal.HOLD; // Market might bounce back
+            }
+            return Signal.STRONG_SELL; // Override strategy -> Panic Sell!
         }
-        return wrappedStrategy.generateSignal(prices); // Delegate
+        
+        // 2. If safe, delegate to the original strategy
+        return wrappedStrategy.generateSignal(candles);
     }
 }
 ```
-*Listing 4: CrashProtection Decorator*
 
+### 3.4 Command Pattern
 
-<br><br>
-<br>
+**Challenge:** 
+The decision to trade (Logic) should be separated from the actual execution of the trade (API calls, Wallet updates). We also need a way to support "Simulation" vs "Live" execution modes transparently.
 
+**Solution:** 
+The **Command Pattern** encapsulates a request as an object. This allows us to parameterize the execution and decouple the invoker (Bot) from the receiver (OrderReceiver).
 
+**Implementation in Project:**
+*   **Command Interface:** `commands.OrderCommand` - Defins `execute()` and `undo()`.
+*   **Concrete Command:** 
+    *   `commands.BuyCommand`: Encapsulates buy logic.
+    *   `commands.SellCommand`: Encapsulates sell logic, symmetrical to BuyCommand.
+*   **Receiver:** `commands.OrderReceiver` - Handles actual execution (Simulation vs Real).
+*   **Additional:** The `OrderCommand` interface includes an `undo()` method for potential rollback.
 
-
-
-<br>
-
-
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-<br><br>
-
-
-
-
-## 3.4 Command Pattern
-
-### 3.4.1 Pattern Overview
-Encapsulates a request as an object, allowing for parameterization of clients with different requests, queuing, and logging.
-
-### 3.4.2 Implementation in Trading Bot
-Used to abstract the execution of trades. `BuyCommand` and `SellCommand` encapsulate the logic of talking to the `OrderReceiver`.
+**Code Showcase:**
 
 ```java
+// 1. The Command Object
 public class BuyCommand implements OrderCommand {
     private OrderReceiver receiver;
     private Order order;
+    private double currentPrice;
 
+    public BuyCommand(OrderReceiver receiver, Order order, double currentPrice) {
+        this.receiver = receiver;
+        this.order = order;
+        this.currentPrice = currentPrice;
+    }
+
+    @Override
     public void execute() {
-        receiver.placeBuyOrder(order);
+        // The command passes all necessary context to the receiver
+        receiver.placeBuyOrder(order, currentPrice);
+    }
+    @Override
+    public void undo() {
+        System.out.println("Undo Buy Command not implemented");
+    }
+}
+
+// 2. The Receiver (Business Logic)
+public class OrderReceiver {
+    public void placeBuyOrder(Order order, double currentPrice) {
+        if (!BinanceConfig.isConfigured()) {
+            // Simulation Logic
+            wallet.withdrawUsdt(order.quantity * currentPrice);
+        } else {
+            // Real Execution Logic
+            service.placeOrder(order.symbol, "BUY", order.quantity);
+        }
     }
 }
 ```
-*Listing 5: BuyCommand Implementation*
 
+### 3.5 Template Method Pattern
 
-<br><br>
-<br>
+**Challenge:** 
+The lifecycle of a trade tick is strict and must always follow the same order: `Fetch Data` -> `Analyze` -> `Create Order` -> `Execute` -> `Log`. However, the implementation of "Analyze" or "Fetch" might differ. We want to enforce this sequence while allowing flexibility in the steps.
 
+**Solution:** 
+The **Template Method Pattern** defines the skeleton of an algorithm in a base class, letting subclasses override specific steps without changing the overall structure.
 
+**Implementation in Project:**
+*   **Abstract Base Class:** `interfaces.TradingTemplate`
+*   **Template Method:** `trade(Candle candle)` - Defined as `final` to prevent modification.
+*   **Concrete Implementation:** `Bot.Bot` extends `TradingTemplate`.
 
-
-
-<br>
-
-
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-
-
-
-
-
-## 3.5 Template Method Pattern
-
-### 3.5.1 Pattern Overview
-Defines the skeleton of an algorithm in an operation, deferring some steps to subclasses.
-
-### 3.5.2 Implementation in Trading Bot
-The `TradingTemplate` class defines the strict lifecycle of a trade tick (Fetch -> Analyze -> Trade -> Log).
+**Code Showcase:**
 
 ```java
 public abstract class TradingTemplate {
-    public final void trade(Price price) {
-        List<Price> prices = fetchData(price);
-        Signal signal = evaluateData(prices);
+    
+    // The "Template Method" - declared final so it cannot be changed
+    public final void trade(Candle candle) {
+        List<Candle> candles = fetchData(candle);
+        Signal signal = evaluateData(candles); // Specific logic happens here
         Order order = createOrder(signal);
         executeOrder(order);
         logResult(order);
     }
-    
-    protected abstract Signal evaluateData(List<Price> prices);
+
+    // Abstract methods to be implemented by subclasses
+    protected abstract Signal evaluateData(List<Candle> candles);
+    protected abstract void executeOrder(Order order);
+    protected abstract void logResult(Order order);
 }
 ```
-*Listing 6: TradingTemplate*
 
+### 3.6 Singleton Pattern
 
-<br><br>
-<br>
+**Challenge:** 
+Components like the `Wallet` (which holds money) and `BotConfig` (which holds global settings) must have exactly one instance. Multiple instances could lead to conflicting states (e.g., one wallet saying you have $100 and another saying $50).
 
+**Solution:** 
+The **Singleton Pattern** ensures a class has only one instance and provides a global point of access to it.
 
+**Implementation in Project:**
+*   **Singleton Class:** `Bot.BotConfig`
+*   **Singleton Class:** `models.Wallet`
 
-
-
-<br>
-
-
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-
-
-## 3.6 Singleton Pattern
-
-### 3.6.1 Pattern Overview
-Ensures a class has only one instance and provides a global point of access to it.
-
-### 3.6.2 Implementation in Trading Bot
-Used for `BotConfig` (configuration) and `Wallet` (funds).
+**Code Showcase:**
 
 ```java
 public class BotConfig {
+    // 1. Private static instance
     private static BotConfig uniqueInstance;
+    public TradingStrategy strategy; // Active Strategy
+    
+    // 2. Private constructor prevents instantiation
     private BotConfig() {}
 
+    // 3. Global access point
     public static synchronized BotConfig getInstance() {
-        if (uniqueInstance == null) uniqueInstance = new BotConfig();
+        if (uniqueInstance == null) {
+            uniqueInstance = new BotConfig();
+        }
         return uniqueInstance;
     }
 }
 ```
-*Listing 7: BotConfig Singleton*
+
+### 3.7 Lock Service (Concurrency)
+
+**Implementation:** `services.LockService` provides a centralized `fileLock` object used in `synchronized` blocks to ensure thread-safe CSV writing across multiple threads.
 
 ---
 
+## 4. Backend Implementation Details
 
+## 4.1 Application Entry Point (Program.java)
 
-<br><br>
-<br>
+The application initializes as follows:
+1.  **Bot Config:** Loads `CrashProtection` wrapping `SmaCrossover` as the initial strategy.
+2.  **Observer Setup:** Registers `PriceListener` to `PriceSubject`.
+3.  **Services:** Starts `ApiService` (port 8081) and `BinanceService`.
+4.  **Main Loop:** Fetches data every 15m (15-minute candles), updates the Subject, and explicitly notifies observers.
 
+## 4.2 Bot Logic (Bot.java)
 
+*   **Quantity Logic:**
+    *   `STRONG_BUY`: Uses 98% of USDT balance.
+    *   `BUY`: Uses 40% of USDT.
+    *   `STRONG_SELL`: Sells 100% of BTC.
+    *   `SELL`: Sells 50% of BTC.
+*   **Minimum Order:** Skips orders where value < 5 USDT.
+*   **Balance Cache:** Caches balance to reduce API calls, updating only on trade execution.
 
+## 4.3 Binance Service & Security
 
+The `BinanceService` handles authenticated requests using HMAC-SHA256 signatures, manages time synchronization, and handles precision rounding.
 
-<br>
+### 4.3.1 Key Features
+*   **Testnet Support:** Configurable via `.env` or defaults to Binance Testnet.
+*   **Time Sync:** Calculates server time offset to prevent "Timestamp for this request is outside of the recvWindow" errors.
+*   **Step Size:** Automatically rounds quantity to the valid symbol step size (e.g., 0.00001 BTC).
 
-
-<br><br>
-<br>
-
-
-
-
-
-<br>
-<br><br>
-
-
-<br><br>
-
-
-
-<br><br>
-
-<br><br>
-<br><br>
-<br><br>
-
-
-
-
-
-
-# 4 Backend Implementation Details
-
-## 4.1 Binance Service & Security
-
-The `BinanceService` handles authenticated requests using HMAC-SHA256 signatures.
-
-<br><br>
-### 4.1.1 HMAC Signature Generation
+### 4.3.2 HMAC Signature Generation
 
 ```java
 private String hmacSha256(String data, String secret) {
@@ -615,13 +400,12 @@ private String hmacSha256(String data, String secret) {
     return Hex.encodeHexString(sha256_HMAC.doFinal(data.getBytes()));
 }
 ```
-*Listing 8: HMAC Generation*
 
-<br><br>
+## 4.4 API Service
 
-## 4.2 API Service
+Handles HTTP requests for the dashboard with CORS support enabled for all origins. Uses `LockService` for thread-safe reading of the trade history CSV.
 
-### 4.2.1 Request Handling
+### 4.4.1 Request Handling
 
 ```java
 static class StrategyHandler implements HttpHandler {
@@ -633,24 +417,16 @@ static class StrategyHandler implements HttpHandler {
     }
 }
 ```
-*Listing 9: API Request Handler*
-
-<br><br>
-
-
-## 4.3 Concurrency & Thread Safety
-
-The application utilizes Java's `synchronized` blocks and a centralized `LockService` to ensure thread-safe operations when writing to the CSV log file.
-
----
 
 
 
-# 5 Frontend Implementation
+## 5. Frontend Implementation
 
 ## 5.1 Angular Architecture
 
-The frontend is built with **Angular 21** using Standalone Components and Signals for reactive state management.
+The frontend is built with **Angular 21** using Standalone Components and Signals.
+*   **Configuration:** Users can select strategies (`SmaCrossover`, `TrendFollowing`, `RSI`, `MACD`, `ADX`, `Default`) and decorators (`None`, `CrashProtection`, `HighRisk`, `LowRisk`).
+
 
 ```typescript
 @Injectable({ providedIn: 'root' })
@@ -660,10 +436,6 @@ export class TradeService {
   }
 }
 ```
-*Listing 10: TradeService*
-
-<br><br>
-
 
 ## 5.2 Real-time Dashboard
 
@@ -671,22 +443,7 @@ The dashboard uses **Chart.js** to render live price data, updating dynamically 
 
 ---
 
-
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-
-
-
-
-# 6 API Documentation
+## 6. API Documentation
 
 ## 6.1 REST Endpoints
 
@@ -703,9 +460,6 @@ The dashboard uses **Chart.js** to render live price data, updating dynamically 
 | **GET** | `/api/strategy` | Returns current active strategy name. |
 | **POST** | `/api/strategy` | Switches the active strategy. |
 
-<br><br>
-
-
 ## 6.2 Request/Response Examples
 
 **POST /api/strategy**
@@ -717,80 +471,13 @@ The dashboard uses **Chart.js** to render live price data, updating dynamically 
 ```
 
 ---
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
-<br><br>
 
-# 7 Testing
+## 7. Conclusion
 
-## 7.1 Unit Tests
-
-```java
-@Test
-public void testRsiStrategy() {
-    TradingStrategy rsi = new RsiStrategy();
-    List<Price> mockPrices = generateMockData(20);
-    Signal signal = rsi.generateSignal(mockPrices);
-    assertNotNull(signal);
-}
-```
-*Listing 11: Unit Test Example*
-
-## 7.2 Integration Tests
-
-```java
-@Test
-public void testCrashProtection() {
-    TradingStrategy protected = new CrashProtection(new SmaCrossover(5,10), 0.05);
-    List<Price> crashData = createCrashScenario(0.10); 
-    Signal signal = protected.generateSignal(crashData);
-    assertEquals(Signal.SELL, signal);
-}
-```
-*Listing 12: Integration Test Example*
-
----
-
-# 8 Deployment
-
-## 8.1 Docker Deployment
-
-```dockerfile
-FROM openjdk:21-slim
-WORKDIR /app
-COPY . .
-RUN javac Program.java
-CMD ["java", "Program"]
-```
-
-## 8.2 Systemd Service
-
-```ini
-[Unit]
-Description=Trading Bot Service
-After=network.target
-
-[Service]
-ExecStart=/usr/bin/java -cp /opt/bot Program
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
----
-
-# 9 Conclusion
-
-## 9.1 Achievements
+## 7.1 Achievements
 This project successfully demonstrates that enterprise-grade software architecture principles can be applied to algorithmic trading. The system is robust, flexible, and maintainable.
 
-## 9.2 Future Enhancements
+## 7.2 Future Enhancements
 *   **Machine Learning Integration:** Python-Bridge for AI models.
 *   **Database Migration:** Moving from CSV to PostgreSQL.
 *   **User Authentication:** JWT auth for Dashboard.
