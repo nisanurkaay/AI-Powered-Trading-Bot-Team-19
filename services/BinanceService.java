@@ -92,6 +92,10 @@ public class BinanceService {
         }
     }
 
+    private double roundToStepSize(double quantity, double stepSize) {
+        return Math.floor(quantity / stepSize) * stepSize;
+    }
+
     public void placeOrder(String symbol, String side, double quantity) {
         if (!BinanceConfig.isConfigured()) {
             System.out.println("SKIPPING ORDER: API Keys not configured in BinanceConfig.java");
@@ -101,9 +105,15 @@ public class BinanceService {
         try {
             if (!isTimeSynced) syncTime();
             
+            // Round quantity to Binance's step size (0.00001 for BTCUSDT)
+            quantity = roundToStepSize(quantity, 0.00001);
+            
+            // Format to 5 decimal places to avoid "too much precision" error
+            String quantityStr = String.format(java.util.Locale.US, "%.5f", quantity);
+            
             String endpoint = "/api/v3/order";
             long timestamp = System.currentTimeMillis() + serverTimeOffset;
-            String queryParams = "symbol=" + symbol + "&side=" + side + "&type=MARKET&quantity=" + quantity + "&timestamp=" + timestamp;
+            String queryParams = "symbol=" + symbol + "&side=" + side + "&type=MARKET&quantity=" + quantityStr + "&timestamp=" + timestamp;
             
             String signature = hmacSha256(queryParams, BinanceConfig.SECRET_KEY);
             String fullQuery = queryParams + "&signature=" + signature;
