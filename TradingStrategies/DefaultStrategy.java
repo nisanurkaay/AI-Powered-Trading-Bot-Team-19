@@ -29,8 +29,8 @@ public class DefaultStrategy implements TradingStrategy {
         double prevClose = candles.get(candles.size() - 2).close;
         double pctChange = (currentPrice - prevClose) / prevClose;
         
-        if (pctChange < -0.02) { 
-             // 2% sudden drop in 1 candle -> Panic Sell
+        if (pctChange < -0.08) { 
+             // 8% sudden drop in 1 candle -> Panic Sell
              return Signal.SELL;
         }
         

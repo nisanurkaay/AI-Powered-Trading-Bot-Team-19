@@ -206,6 +206,27 @@ button:hover {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px; /* avoid content hitting scrollbar */
+}
+
+/* Custom Scrollbar */
+.trade-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.trade-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.trade-list::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 20px;
+}
+
+.trade-list::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-dim);
 }
 
 .trade-card {
