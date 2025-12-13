@@ -11,6 +11,9 @@ import java.nio.charset.StandardCharsets;
 
 public class BinanceService {
 
+    private static long serverTimeOffset = 0;
+    private static boolean isTimeSynced = false;
+
     public models.Candle getCandle(String symbol, String interval) {
         try {
             String endpoint = BinanceConfig.BASE_URL + "/api/v3/klines?symbol=" + symbol + "&interval=" + interval + "&limit=1";
@@ -42,6 +45,57 @@ public class BinanceService {
         return null;
     }
 
+    private void syncTime() {
+        try {
+            if (isTimeSynced) return;
+            
+            String endpoint = BinanceConfig.BASE_URL + "/api/v3/time";
+            URL url = new URL(endpoint);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
+            
+            if (conn.getResponseCode() == 200) {
+                 BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                 String inputLine;
+                 StringBuilder content = new StringBuilder();
+                 while ((inputLine = in.readLine()) != null) {
+                     content.append(inputLine);
+                 }
+                 in.close();
+                 
+                 // Payload: {"serverTime":1765619555123}
+                 String json = content.toString();
+                 String search = "\"serverTime\":";
+                 int idx = json.indexOf(search);
+                 if (idx != -1) {
+                     int start = idx + search.length();
+                     int end = json.indexOf("}", start);
+                     if (end != -1) {
+                         long serverTime = Long.parseLong(json.substring(start, end));
+                         // local + offset = server => offset = server - local
+                         // wait, usually we want: requestTimestamp = serverTime (roughly)
+                         // requestTimestamp = localTime + offset
+                         // offset = serverTime - localTime
+                         serverTimeOffset = serverTime - System.currentTimeMillis();
+                         isTimeSynced = true;
+                         System.out.println("Time synced. Offset: " + serverTimeOffset + " ms");
+                     }
+                 }
+            } else {
+                System.err.println("Failed to sync time. Code: " + conn.getResponseCode());
+            }
+        } catch (Exception e) {
+            System.err.println("Time sync error: " + e.getMessage());
+        }
+    }
+
+    private double roundToStepSize(double quantity, double stepSize) {
+        return Math.floor(quantity / stepSize) * stepSize;
+    }
+
     public void placeOrder(String symbol, String side, double quantity) {
         if (!BinanceConfig.isConfigured()) {
             System.out.println("SKIPPING ORDER: API Keys not configured in BinanceConfig.java");
@@ -49,9 +103,17 @@ public class BinanceService {
         }
 
         try {
+            if (!isTimeSynced) syncTime();
+            
+            // Round quantity to Binance's step size (0.00001 for BTCUSDT)
+            quantity = roundToStepSize(quantity, 0.00001);
+            
+            // Format to 5 decimal places to avoid "too much precision" error
+            String quantityStr = String.format(java.util.Locale.US, "%.5f", quantity);
+            
             String endpoint = "/api/v3/order";
-            long timestamp = System.currentTimeMillis();
-            String queryParams = "symbol=" + symbol + "&side=" + side + "&type=MARKET&quantity=" + quantity + "&timestamp=" + timestamp;
+            long timestamp = System.currentTimeMillis() + serverTimeOffset;
+            String queryParams = "symbol=" + symbol + "&side=" + side + "&type=MARKET&quantity=" + quantityStr + "&timestamp=" + timestamp;
             
             String signature = hmacSha256(queryParams, BinanceConfig.SECRET_KEY);
             String fullQuery = queryParams + "&signature=" + signature;
@@ -136,8 +198,10 @@ public class BinanceService {
         }
 
         try {
+            if (!isTimeSynced) syncTime();
+            
             String endpoint = "/api/v3/account";
-            long timestamp = System.currentTimeMillis();
+            long timestamp = System.currentTimeMillis() + serverTimeOffset;
             String queryParams = "timestamp=" + timestamp;
             String signature = hmacSha256(queryParams, BinanceConfig.SECRET_KEY);
             String fullQuery = queryParams + "&signature=" + signature;

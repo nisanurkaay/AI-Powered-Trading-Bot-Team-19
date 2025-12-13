@@ -37,7 +37,7 @@ public class Program {
         // Real-time data loop
         while(true){
             // Fetch new candle from Binance
-            models.Candle currentCandle = binanceService.getCandle(symbol, "1m");
+            models.Candle currentCandle = binanceService.getCandle(symbol, "15m");
 
             if (currentCandle != null) {
                 System.out.println("Updated candle (" + symbol + "): " + currentCandle);

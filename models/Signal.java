@@ -1,7 +1,9 @@
 package models;
 
-public enum Signal{
+public enum Signal {
+    STRONG_BUY,
     BUY,
     HOLD,
-    SELL
+    SELL,
+    STRONG_SELL
 }
