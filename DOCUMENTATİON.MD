@@ -17,6 +17,14 @@ Unlike simple script-based bots, this application uses a loosely coupled archite
 - **Real-time event-driven processing** of market data.
 - **Simulation and Live modes** for safe testing and execution.
 
+<br> 
+
+
+
+
+
+<br>
+
 ## 1.2 System Requirements
 
 ### 1.2.1 Functional Requirements
@@ -25,10 +33,34 @@ Unlike simple script-based bots, this application uses a loosely coupled archite
 - **Risk Management:** The system must automatically trigger a "Panic Sell" if prices drop >5% in 10 seconds.
 - **Visual Dashboard:** A web interface must display live prices, active strategy, and portfolio balance.
 
+<br> 
+
+
+
+
+
+<br>
+
 ### 1.2.2 Non-Functional Requirements
 - **Latency:** Signal generation processing time must be under 50ms.
 - **Reliability:** The system must handle API failures gracefully.
 - **Extensibility:** New strategies must be addable without modifying the Bot class.
+
+
+<br> 
+
+
+
+
+
+<br>
+<br> 
+
+
+
+
+
+<br>
 
 ## 1.3 Technology Stack
 
@@ -41,6 +73,94 @@ Unlike simple script-based bots, this application uses a loosely coupled archite
 | **Build Tool** | Maven | 3.8+ | Dependency management. |
 
 ---
+
+<br> 
+
+
+
+
+
+<br>
+<br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br>
+<br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br>
+<br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br>
+<br> 
+
+
+
+
+
+<br>
+<br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br>
+<br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br>
+
+<br> 
+
+
+
+
+
+<br>
 
 ## 2. System Architecture
 
@@ -76,6 +196,26 @@ Key data structures used across layers:
 *   **WalletBalance:** Holds USDT and BTC amounts from Binance.
 
 ---
+
+<br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br>
 
 ## 3. Design Patterns Implementation
 
@@ -139,6 +279,68 @@ public class SmaCrossover implements TradingStrategy {
 }
 ```
 
+<br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br>
+
 ### 3.2 Observer Pattern
 
 **Challenge:** 
@@ -174,6 +376,8 @@ public class PriceSubject implements Subject {
     }
 }
 
+
+
 // 2. The Observer (Listener)
 public class PriceListener implements Observer {
     Bot bot = new Bot();
@@ -184,6 +388,7 @@ public class PriceListener implements Observer {
     }
 }
 ```
+
 
 ### 3.3 Decorator Pattern
 
@@ -251,7 +456,6 @@ The **Command Pattern** encapsulates a request as an object. This allows us to p
 **Code Showcase:**
 
 ```java
-// 1. The Command Object
 public class BuyCommand implements OrderCommand {
     private OrderReceiver receiver;
     private Order order;
@@ -265,7 +469,6 @@ public class BuyCommand implements OrderCommand {
 
     @Override
     public void execute() {
-        // The command passes all necessary context to the receiver
         receiver.placeBuyOrder(order, currentPrice);
     }
     @Override
@@ -274,14 +477,12 @@ public class BuyCommand implements OrderCommand {
     }
 }
 
-// 2. The Receiver (Business Logic)
+
 public class OrderReceiver {
     public void placeBuyOrder(Order order, double currentPrice) {
         if (!BinanceConfig.isConfigured()) {
-            // Simulation Logic
             wallet.withdrawUsdt(order.quantity * currentPrice);
         } else {
-            // Real Execution Logic
             service.placeOrder(order.symbol, "BUY", order.quantity);
         }
     }
@@ -321,6 +522,34 @@ public abstract class TradingTemplate {
     protected abstract void logResult(Order order);
 }
 ```
+<br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+<br><br> 
+<br>
 
 ### 3.6 Singleton Pattern
 
@@ -355,21 +584,55 @@ public class BotConfig {
 }
 ```
 
+<br> 
+
+
+
+
+
+<br>
 ### 3.7 Lock Service (Concurrency)
 
 **Implementation:** `services.LockService` provides a centralized `fileLock` object used in `synchronized` blocks to ensure thread-safe CSV writing across multiple threads.
 
 ---
 
+<br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br>
+
 ## 4. Backend Implementation Details
 
 ## 4.1 Application Entry Point (Program.java)
-
 The application initializes as follows:
 1.  **Bot Config:** Loads `CrashProtection` wrapping `SmaCrossover` as the initial strategy.
 2.  **Observer Setup:** Registers `PriceListener` to `PriceSubject`.
 3.  **Services:** Starts `ApiService` (port 8081) and `BinanceService`.
 4.  **Main Loop:** Fetches data every 15m (15-minute candles), updates the Subject, and explicitly notifies observers.
+
+<br> 
+
+
+
+
+
+<br>
 
 ## 4.2 Bot Logic (Bot.java)
 
@@ -380,6 +643,14 @@ The application initializes as follows:
     *   `SELL`: Sells 50% of BTC.
 *   **Minimum Order:** Skips orders where value < 5 USDT.
 *   **Balance Cache:** Caches balance to reduce API calls, updating only on trade execution.
+
+<br> 
+
+
+
+
+
+<br>
 
 ## 4.3 Binance Service & Security
 
@@ -418,7 +689,74 @@ static class StrategyHandler implements HttpHandler {
 }
 ```
 
+<br> 
 
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br>
+<br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br>
 
 ## 5. Frontend Implementation
 
@@ -436,33 +774,143 @@ export class TradeService {
   }
 }
 ```
+<br> 
+
+
+
+
+
+<br>
 
 ## 5.2 Real-time Dashboard
 
 The dashboard uses **Chart.js** to render live price data, updating dynamically as new price points arrive from the backend API.
 
 ---
+<br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br>
+<br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br><br> 
+<br>
 
 ## 6. API Documentation
 
-## 6.1 REST Endpoints
+The API is served via Java's native `com.sun.net.httpserver` on port **8081**.
 
-### 6.1.1 Trade History API
+### 6.1 CORS & Headers
+
+All endpoints include the following headers for cross-origin support:
+```
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Authorization
+Cache-Control: no-cache, no-store, must-revalidate
+```
+
+### 6.2 REST Endpoints
+
+#### 6.2.1 Trade History API
 
 | Method | Endpoint | Description |
 | :-- | :-- | :-- |
-| **GET** | `/api/trades` | Returns list of executed trades. |
+| **GET** | `/api/trades` | Returns list of executed trades from CSV. |
+| **OPTIONS** | `/api/trades` | CORS preflight (returns 204). |
 
-### 6.1.2 Strategy Management API
+**Response Format (GET /api/trades):**
+```json
+[
+    {
+        "timestamp": "2025-12-14T01:30:00",
+        "symbol": "BTCUSDT",
+        "side": "BUY",
+        "quantity": "0.00123",
+        "price": 42500.00,
+        "usdt": 947.50,
+        "btc": 0.00123
+    }
+]
+```
+
+**Implementation Details:**
+*   Uses `LockService.fileLock` for thread-safe CSV reading.
+*   Parses CSV columns: `timestamp, symbol, side, quantity, price, usdt, btc`.
+<br> 
+
+
+
+
+
+<br><br> 
+
+
+
+
+
+<br>
+<br><br>
+
+#### 6.2.2 Strategy Management API
 
 | Method | Endpoint | Description |
 | :-- | :-- | :-- |
 | **GET** | `/api/strategy` | Returns current active strategy name. |
 | **POST** | `/api/strategy` | Switches the active strategy. |
+| **OPTIONS** | `/api/strategy` | CORS preflight (returns 204). |
 
-## 6.2 Request/Response Examples
+**Response Format (GET /api/strategy):**
+```json
+{
+    "name": "CrashProtection + SMA Crossover (5/10)"
+}
+```
 
-**POST /api/strategy**
+**Request Format (POST /api/strategy):**
 ```json
 {
     "strategy": "RsiStrategy",
@@ -470,21 +918,35 @@ The dashboard uses **Chart.js** to render live price data, updating dynamically 
 }
 ```
 
+**Response Format (POST /api/strategy):**
+```json
+{
+    "status": "updated",
+    "name": "CrashProtection + RSI Strategy"
+}
+```
+
+**Supported Strategy & Decorator Values:**
+
+| Strategy | Decorator |
+| :-- | :-- |
+| `SmaCrossover` | `None` |
+| `TrendFollowing` | `CrashProtection` |
+| `RSI` | `HighRisk` |
+| `MACD` | `LowRisk` |
+| `ADX` | |
+| `Default` | |
+
 ---
 
+<br> 
+
+
+
+
+
+<br>
 ## 7. Conclusion
 
 ## 7.1 Achievements
 This project successfully demonstrates that enterprise-grade software architecture principles can be applied to algorithmic trading. The system is robust, flexible, and maintainable.
-
-## 7.2 Future Enhancements
-*   **Machine Learning Integration:** Python-Bridge for AI models.
-*   **Database Migration:** Moving from CSV to PostgreSQL.
-*   **User Authentication:** JWT auth for Dashboard.
-
----
-
-**References**
-
-1. Gamma, E., et al. (1994). *Design Patterns*. Addison-Wesley.
-2. Binance API Docs. (2025).
