@@ -5,6 +5,11 @@ import interfaces.TradingStrategy;
 import models.Candle;
 import models.Signal;
 
+/**
+ * Abstract base class for Strategy Decorators.
+ * Follows the Decorator Pattern to add dynamic behaviors (Risk Management, Filters) 
+ * to existing Trading Strategies without modifying them.
+ */
 public abstract class StrategyDecorator implements TradingStrategy {
 
     protected TradingStrategy wrappedStrategy;

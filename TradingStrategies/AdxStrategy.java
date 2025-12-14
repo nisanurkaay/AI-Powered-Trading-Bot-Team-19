@@ -5,10 +5,19 @@ import interfaces.TradingStrategy;
 import models.Signal;
 import models.Candle;
 
+/**
+ * ADX (Average Directional Index) Strategy.
+ * Measures trend strength and direction to identify strong trends.
+ */
 public class AdxStrategy implements TradingStrategy {
     private int period = 14;
 
-    @Override
+    /**
+     * Generates a signal based on ADX strength and DI crossovers.
+     * ADX > 25 indicates a strong trend.
+     * DI+ > DI- indicates an Uptrend.
+     * DI- > DI+ indicates a Downtrend.
+     */
     public Signal generateSignal(List<Candle> candles) {
         if (candles.size() < period * 2) {
             return Signal.HOLD;
@@ -16,10 +25,10 @@ public class AdxStrategy implements TradingStrategy {
 
         AdxResult current = calculateADX(candles, candles.size() - 1);
         
-        // ADX > 25: Strong Trend
-        // PDI > MDI: Uptrend
-        // MDI > PDI: Downtrend
-        // Slope Logic: Check if ADX is rising
+        // Strategy Logic:
+        // 1. Trend Strength: ADX > 25
+        // 2. Trend Direction: Determined by PlusDI (Bullish) vs MinusDI (Bearish)
+        // 3. Momentum: ADX should be rising (current > previous)
         
         AdxResult previous = calculateADX(candles, candles.size() - 2);
         boolean adxRising = current.adx > previous.adx;
@@ -44,6 +53,13 @@ public class AdxStrategy implements TradingStrategy {
         double minusDI;
     }
 
+    /**
+     * Calculates the ADX, PlusDI, and MinusDI values.
+     * 
+     * @param data The historical price data.
+     * @param endIndex The index to calculate for.
+     * @return An AdxResult object containing the calculated indicators.
+     */
     private AdxResult calculateADX(List<Candle> data, int endIndex) {
            
 

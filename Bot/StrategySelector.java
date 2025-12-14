@@ -8,16 +8,17 @@ import TradingStrategies.*;
 public class StrategySelector {
     
     // Strategies
-    private TradingStrategy trendStrategy;
-    private TradingStrategy meanReversionStrategy;
-    private TradingStrategy riskManagementStrategy;
+    private TradingStrategy trendStrategy;          // MACD (For strong trends)
+    private TradingStrategy meanReversionStrategy;  // RSI (For ranging markets)
+    private TradingStrategy riskManagementStrategy; // Default/Crash Protection (For uncertainty)
     
     // Market Condition Indicators
     private AdxStrategy adxAnalyzer;
     
     private int cooldown = 0;
-    private final int COOLDOWN_PERIOD = 5; // 5 candles before switching again
+    private final int COOLDOWN_PERIOD = 5; // Minimum candles to wait before switching strategy again
     
+    // The currently active strategy
     private TradingStrategy currentStrategy;
     
     public StrategySelector() {
@@ -32,6 +33,14 @@ public class StrategySelector {
         this.adxAnalyzer = new AdxStrategy(); 
     }
     
+    /**
+     * Determines the best trading strategy based on current market conditions.
+     * Uses ADX (Average Directional Index) to differentiate between trending and ranging markets.
+     * Includes a cooldown mechanism to prevent rapid strategy switching (hysteresis).
+     * 
+     * @param candles The historical price data.
+     * @return The chosen TradingStrategy.
+     */
     public TradingStrategy determineStrategy(List<Candle> candles) {
         if (candles.size() < 30) return riskManagementStrategy; // Not enough data
         

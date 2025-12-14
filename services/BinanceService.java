@@ -11,9 +11,18 @@ import java.nio.charset.StandardCharsets;
 
 public class BinanceService {
 
+    // Offset between local time and server time to ensure request timestamps are accurate
     private static long serverTimeOffset = 0;
+    // Flag to check if time synchronization has been performed
     private static boolean isTimeSynced = false;
 
+    /**
+     * Fetches the latest candle data for a specific symbol and interval.
+     * 
+     * @param symbol The trading pair symbol (e.g., BTCUSDT).
+     * @param interval The candle interval (e.g., 1m, 1h).
+     * @return A Candle object containing Open, High, Low, Close, Volume data, or null if failed.
+     */
     public models.Candle getCandle(String symbol, String interval) {
         try {
             String endpoint = BinanceConfig.BASE_URL + "/api/v3/klines?symbol=" + symbol + "&interval=" + interval + "&limit=1";
@@ -45,6 +54,10 @@ public class BinanceService {
         return null;
     }
 
+    /**
+     * Synchronizes local time with the server time to prevent "timestamp ahead/behind" errors.
+     * This is critical for signing requests correctly.
+     */
     private void syncTime() {
         try {
             if (isTimeSynced) return;
@@ -76,7 +89,9 @@ public class BinanceService {
                      if (end != -1) {
                          long serverTime = Long.parseLong(json.substring(start, end));
                          // local + offset = server => offset = server - local
-                         // wait, usually we want: requestTimestamp = serverTime (roughly)
+                          // Calculate the time difference (offset) between local machine and server.
+                          // Positive offset means server is ahead, negative means local is ahead.
+                          // requestTimestamp = System.currentTimeMillis() + offset
                          // requestTimestamp = localTime + offset
                          // offset = serverTime - localTime
                          serverTimeOffset = serverTime - System.currentTimeMillis();
@@ -92,10 +107,25 @@ public class BinanceService {
         }
     }
 
+    /**
+     * Rounds a quantity to the nearest valid step size defined by the exchange.
+     * 
+     * @param quantity The raw quantity to round.
+     * @param stepSize The smallest valid increment (e.g., 0.00001).
+     * @return The rounded quantity.
+     */
     private double roundToStepSize(double quantity, double stepSize) {
         return Math.floor(quantity / stepSize) * stepSize;
     }
 
+    /**
+     * Places a MARKET order for the specified symbol and side.
+     * Automatically handles time synchronization and quantity rounding.
+     * 
+     * @param symbol The trading pair symbol.
+     * @param side The order side ("BUY" or "SELL").
+     * @param quantity The amount of asset to buy or sell.
+     */
     public void placeOrder(String symbol, String side, double quantity) {
         if (!BinanceConfig.isConfigured()) {
             System.out.println("SKIPPING ORDER: API Keys not configured in BinanceConfig.java");
@@ -149,6 +179,14 @@ public class BinanceService {
         }
     }
 
+    /**
+     * Generates an HMAC-SHA256 signature for the request query string.
+     * Required for authenticated endpoints.
+     * 
+     * @param data The query string to sign.
+     * @param secret The API secret key.
+     * @return The hex-encoded signature string.
+     */
     private String hmacSha256(String data, String secret) {
         try {
             Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
@@ -165,6 +203,12 @@ public class BinanceService {
         }
     }
 
+    /**
+     * Parses the raw JSON response from the klines endpoint into a Candle object.
+     * 
+     * @param json The JSON string response from Binance.
+     * @return A Candle object.
+     */
     private models.Candle parseCandleFromJson(String json) {
         try {
             json = json.trim();
@@ -192,6 +236,11 @@ public class BinanceService {
         }
         return null;
     }
+    /**
+     * Fetches the current wallet balance for USDT and BTC.
+     * 
+     * @return A WalletBalance object containing free USDT and BTC amounts.
+     */
     public models.WalletBalance getWalletBalance() {
         if (!BinanceConfig.isConfigured()) {
             return new models.WalletBalance(0, 0);

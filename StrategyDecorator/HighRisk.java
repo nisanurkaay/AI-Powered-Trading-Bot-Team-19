@@ -5,6 +5,11 @@ import interfaces.TradingStrategy;
 import models.Candle;
 import models.Signal;
 
+/**
+ * A High Risk / High Reward strategy decorator.
+ * Looks for aggressive breakout setups (Bullish Divergence, Volume Spikes, Pumps).
+ * Can override Signal.HOLD to take action if a strong opportunity is detected.
+ */
 public class HighRisk extends StrategyDecorator {
 
     private int period = 15; 
@@ -20,7 +25,7 @@ public class HighRisk extends StrategyDecorator {
             return baseSignal;
         }
 
-        if (candles.size() < 20) { // Uyuşmazlık kontrolü için biraz daha veri lazım
+        if (candles.size() < 20) { // Need more data for reliable divergence checks
             return Signal.HOLD;
         }
 
@@ -68,7 +73,7 @@ public class HighRisk extends StrategyDecorator {
                 System.out.println("HighRisk: Breakout detected but Weak Indicators (Vol/MACD). Ignored.");
             }
         } else if (currentClose < lowestLow * 0.995) {
-            System.out.println("HighRisk: Breakout DOWN (Toleranslı) -> SELL");
+            System.out.println("HighRisk: Breakout DOWN (With Tolerance) -> SELL");
             return Signal.SELL;
         }
 
@@ -132,7 +137,7 @@ public class HighRisk extends StrategyDecorator {
         if (data.size() <= period) return 50;
         
         double avgGain = 0, avgLoss = 0;
-        // Son 'period' kadar veriyi al
+        // Take data for the last 'period'
         int start = Math.max(0, data.size() - period - 1);
         
         for (int i = start + 1; i < data.size(); i++) {

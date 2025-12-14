@@ -5,10 +5,14 @@ import interfaces.TradingStrategy;
 import models.Signal;
 import models.Candle;
 
+/**
+ * MACD (Moving Average Convergence Divergence) Strategy.
+ * A classic momentum and trend-following indicator.
+ */
 public class MacdStrategy implements TradingStrategy {
-    private int fastPeriod = 12;
-    private int slowPeriod = 26;
-    private int signalPeriod = 9;
+    private int fastPeriod = 12; // Short-term EMA
+    private int slowPeriod = 26; // Long-term EMA
+    private int signalPeriod = 9; // Signal Line EMA
 
     @Override
     public Signal generateSignal(List<Candle> candles) {
@@ -19,7 +23,11 @@ public class MacdStrategy implements TradingStrategy {
         MacdResult current = calculateMACD(candles, candles.size() - 1);
         MacdResult previous = calculateMACD(candles, candles.size() - 2);
 
-        // 1. Histogram Reversal: Histogram negative but rising toward zero (Bullish momentum building)
+        // STRATEGY LOGIC:
+        
+        // 1. Histogram Reversal (Early Entry):
+        // Histogram is negative (Bearish) but starts rising toward zero.
+        // This indicates that the bearish momentum is weakening, potential for reversal.
         boolean histogramReversalUp = current.histogram < 0 && 
                                       current.histogram > previous.histogram && 
                                       previous.histogram < previous_prev_histogram(candles); 
@@ -28,7 +36,9 @@ public class MacdStrategy implements TradingStrategy {
              return Signal.BUY; 
         }
 
-        // Standard Crossover
+        // 2. Standard Crossover (Confirmation):
+        // BUY: MACD Line crosses ABOVE Signal Line
+        // SELL: MACD Line crosses BELOW Signal Line
         if (previous.macdLine < previous.signalLine && current.macdLine > current.signalLine) {
             return Signal.BUY;
         } else if (previous.macdLine > previous.signalLine && current.macdLine < current.signalLine) {
@@ -45,11 +55,18 @@ public class MacdStrategy implements TradingStrategy {
     }
 
     private static class MacdResult {
-        double macdLine;
-        double signalLine;
-        double histogram;
+        double macdLine;   // Fast EMA - Slow EMA
+        double signalLine; // EMA of MACD Line
+        double histogram;  // MACD Line - Signal Line
     }
 
+    /**
+     * Calculates MACD values for a specific point in time.
+     * 
+     * @param data The historical candles.
+     * @param endIndex The index to calculate for.
+     * @return MacdResult containing macd, signal, and histogram values.
+     */
     private MacdResult calculateMACD(List<Candle> data, int endIndex) {
         double fastEma = calculateEMA(data, fastPeriod, endIndex);
         double slowEma = calculateEMA(data, slowPeriod, endIndex);

@@ -5,6 +5,11 @@ import interfaces.TradingStrategy;
 import models.Signal;
 import models.Candle;
 
+/**
+ * RSI (Relative Strength Index) Strategy.
+ * A momentum oscillator that measures the speed and change of price movements.
+ * Used primarily to identify Overbought and Oversold conditions.
+ */
 public class RsiStrategy implements TradingStrategy {
     private int period = 14;
 
@@ -19,8 +24,17 @@ public class RsiStrategy implements TradingStrategy {
         // Identify Trend via simple SMA check (using 50 SMA)
         boolean isUptrend = isUptrend(candles);
 
-        // Uptrend: Buy dips at 40-45 (Support), Sell at 80
-        // Sideways/Downtrend: Buy at 30, Sell at 70
+        // Strategy Logic:
+        // 1. Trend Filter: Use SMA 50 to determine the dominant market trend.
+        // 2. Dynamic Thresholds: Adjust Buy/Sell levels based on the trend.
+        
+        // Uptrend (Bullish):
+        // - Buy on Dips (RSI < 45) -> Aggressive Entry
+        // - Sell at Extreme highs (RSI > 80)
+        
+        // Downtrend/Sideways (Bearish):
+        // - Buy only at Extreme lows (RSI < 30) -> Conservative Entry
+        // - Sell early (RSI > 70)
         
         double buyThreshold = isUptrend ? 45.0 : 30.0;
         double sellThreshold = isUptrend ? 80.0 : 70.0;
@@ -34,6 +48,9 @@ public class RsiStrategy implements TradingStrategy {
         return Signal.HOLD;
     }
     
+    /**
+     * Checks if the market is in an uptrend using a simple 50-period SMA.
+     */
     private boolean isUptrend(List<Candle> candles) {
         if (candles.size() < 50) return false;
         double sma50 = 0;
@@ -44,6 +61,13 @@ public class RsiStrategy implements TradingStrategy {
         return candles.get(candles.size() - 1).close > sma50;
     }
 
+    /**
+     * Calculates the Relative Strength Index (RSI).
+     * 
+     * @param data The historical candles.
+     * @param endIndex The index to calculate for.
+     * @return The RSI value (0-100).
+     */
     private double calculateRSI(List<Candle> data, int endIndex) {
         double avgGain = 0, avgLoss = 0;
         

@@ -5,6 +5,11 @@ import interfaces.TradingStrategy;
 import models.Candle;
 import models.Signal;
 
+/**
+ * A Low Risk / Conservative strategy decorator.
+ * Prioritizes capital preservation by confirming trends with Volume and SMA.
+ * Only enters trades when multiple indicators (Trend, Vol, MACD, RSI) align.
+ */
 public class LowRisk extends StrategyDecorator {
 
     private int period = 20; 
@@ -71,7 +76,7 @@ public class LowRisk extends StrategyDecorator {
             }
         } 
         else if (currentClose < lowestLow) {
-            System.out.println("LowRisk: Destek Kırıldı -> SELL");
+            System.out.println("LowRisk: Support Broken -> SELL");
             return Signal.SELL;
         }
 

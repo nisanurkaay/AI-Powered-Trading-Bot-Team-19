@@ -16,8 +16,17 @@ import StrategyDecorator.*;
 import interfaces.TradingStrategy;
 import java.io.InputStreamReader;
 
+/**
+ * Simple HTTP API Service to expose trading data and control strategy settings.
+ * Runs on a lightweight HttpServer.
+ */
 public class ApiService {
     
+    /**
+     * Starts the HTTP server on the specified port.
+     * 
+     * @param port The port to listen on (e.g., 8000).
+     */
     public void start(int port) {
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
@@ -31,6 +40,10 @@ public class ApiService {
         }
     }
 
+    /**
+     * Handler for /api/trades endpoint.
+     * Returns the list of recent trades in JSON format.
+     */
     static class TradesHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
@@ -57,6 +70,7 @@ public class ApiService {
             os.close();
         }
 
+        // Reads the CSV file effectively and converts it to a JSON array string manually to avoid dependencies
         private String getTradesAsJson() {
             StringBuilder json = new StringBuilder("[");
             synchronized (services.LockService.fileLock) {
@@ -89,6 +103,11 @@ public class ApiService {
         }
     }
 
+    /**
+     * Handler for /api/strategy endpoint.
+     * GET: Returns current strategy name.
+     * POST: Updates the strategy based on request body keywords.
+     */
     static class StrategyHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {

@@ -16,11 +16,18 @@ public class Bot extends TradingTemplate {
     private BotConfig config = BotConfig.getInstance();
     private StrategySelector selector = new StrategySelector();
     
-    // Bakiye Önbelleği (Grafiklerin akması ve API limitlerini korumak için)
+    // Balance Cache (To optimize API usage and avoid rate limits)
     private double lastUsdtBalance = 0;
     private double lastBtcBalance = 0;
     private boolean isBalanceInitialized = false;
 
+    /**
+     * Ingests a new candle into the bot's data stream.
+     * Keeps a sliding window of the last 500 candles to manage memory.
+     * 
+     * @param candle The new market data point.
+     * @return The updated list of historical candles.
+     */
     @Override
     protected List<Candle> fetchData(Candle candle) {
         data.add(candle);
@@ -31,6 +38,13 @@ public class Bot extends TradingTemplate {
         return data; 
     }
 
+    /**
+     * Evaluates market data using the dynamically selected strategy.
+     * The StrategySelector determines the best strategy based on current market conditions (e.g., ADX).
+     * 
+     * @param candles The historical price data.
+     * @return The trading signal (BUY, SELL, HOLD, etc.).
+     */
     @Override
     protected Signal evaluateData(List<Candle> candles) {
          if (candles.isEmpty()) return Signal.HOLD;
@@ -46,6 +60,7 @@ public class Bot extends TradingTemplate {
          return config.strategy.generateSignal(candles);
     }
 
+    // Updates wallet balance from Binance API or Local Simulation Wallet
     private void updateBalance() {
         if (services.BinanceConfig.isConfigured()) {
             services.BinanceService service = new services.BinanceService();
@@ -60,6 +75,13 @@ public class Bot extends TradingTemplate {
         isBalanceInitialized = true;
     }
 
+    /**
+     * Converts a raw signal into a concrete Order object.
+     * Determines the quantity to trade based on the signal strength and current balance.
+     * 
+     * @param signal The trading signal received.
+     * @return An Order object ready for execution.
+     */
     @Override
     protected Order createOrder(Signal signal) {
         String symbol = "BTCUSDT";
@@ -79,24 +101,28 @@ public class Bot extends TradingTemplate {
 
         switch (signal) {
             case STRONG_BUY:
+                // High confidence: Use 98% of available USDT (leaving small buffer)
                 side = "BUY";
                 quantity = (lastUsdtBalance * 0.98) / currentPrice;
                 System.out.println(">>> STRONG_BUY: All In! (" + String.format("%.2f", lastUsdtBalance * 0.98) + " USDT)");
                 break;
                 
             case BUY:
+                // Normal confidence: Use 40% of available USDT
                 side = "BUY";
                 quantity = (lastUsdtBalance * 0.40) / currentPrice;
                 System.out.println(">>> BUY: Standard Entry (" + String.format("%.2f", lastUsdtBalance * 0.40) + " USDT)");
                 break;
 
             case STRONG_SELL:
+                // High risk/crash: Sell ALL BTC immediately
                 side = "SELL";
                 quantity = lastBtcBalance; 
                 System.out.println(">>> STRONG_SELL: Panic Sell (All BTC)");
                 break;
 
             case SELL:
+                // Take profit/weak sell: Sell 50% of BTC holdings
                 side = "SELL";
                 quantity = lastBtcBalance * 0.50;
                 System.out.println(">>> SELL: Take Profit (50% BTC)");
@@ -108,6 +134,7 @@ public class Bot extends TradingTemplate {
                 break;
         }
         
+        // Filter out dust orders (too small to be accepted by exchange)
         if (!side.equals("HOLD") && (quantity * currentPrice < 5.0)) { 
              System.out.println("Order quantity too small (" + String.format("%.2f", quantity * currentPrice) + " USDT). Skipping.");
              return new Order(symbol, "HOLD", 0);
@@ -116,6 +143,12 @@ public class Bot extends TradingTemplate {
         return new Order(symbol, side, quantity);
     }
 
+    /**
+     * Executes the order using the Command Pattern.
+     * Dispatches Buy or Sell commands to the OrderReceiver.
+     * 
+     * @param order The order to execute.
+     */
     @Override
     protected void executeOrder(Order order) {
         if (order.side.equals("HOLD")) return;

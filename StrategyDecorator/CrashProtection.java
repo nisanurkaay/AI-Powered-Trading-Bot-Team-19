@@ -5,8 +5,13 @@ import interfaces.TradingStrategy;
 import models.Candle;
 import models.Signal;
 
+/**
+ * A Risk Management decorator that acts as a circuit breaker.
+ * Truncates positions if a sudden price drop occurs (Panic Sell),
+ * unless the market is already oversold (RSI < 25), in which case it holds.
+ */
 public class CrashProtection extends StrategyDecorator {
-    private final double dropThreshold; 
+    private final double dropThreshold; // Percentage drop to trigger protection (e.g., 0.05 for 5%) 
 
     public CrashProtection(TradingStrategy strategy, double dropThreshold) {
         super(strategy);
@@ -32,7 +37,7 @@ public class CrashProtection extends StrategyDecorator {
                 return Signal.HOLD; 
             }
             
-            // Düşüş varsa ve RSI da düşük değilse ACİL SATIŞ!
+            // If there is a drop and RSI is not oversold -> PANIC SELL!
             System.out.println("CRASH PROTECTION ENABLED: Panic Sell! (Drop: " + String.format("%.2f%%", change * 100) + ")");
             return Signal.STRONG_SELL;
         }
